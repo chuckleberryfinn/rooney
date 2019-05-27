@@ -1,0 +1,8 @@
+[package]
+name = "rooney"
+version = "0.1.0"
+authors = ["nemo <nemo@redbrick.dcu.ie>"]
+edition = "2018"
+
+[dependencies]
+irc = "0.13"
