@@ -1,4 +1,5 @@
-extern crate irc;
+mod db;
+mod replies;
 
 use irc::client::prelude::*;
 
@@ -7,15 +8,17 @@ fn main() {
 
     let mut reactor = IrcReactor::new().unwrap();
     let client = reactor.prepare_client_and_connect(&config).unwrap();
+    let replies = replies::Replies::new();
     client.identify().unwrap();
 
-    reactor.register_client_with_handler(client, |client, message| {
+    reactor.register_client_with_handler(client, move |client, message| {
         if let Command::PRIVMSG(ref _target, ref msg) = message.command {
-            match msg.as_ref() {
-                "!coin" => client.send_privmsg(message.response_target().unwrap(), "Hi!")?,
-                _ => (),
+            match replies.handle_message(&msg) {
+                Some(response) => client.send_privmsg(message.response_target().unwrap(), response)?,
+                None => (),
             }
         }
+
         Ok(())
     });
 
