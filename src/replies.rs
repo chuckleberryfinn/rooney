@@ -24,7 +24,7 @@ impl Replies {
             Some(c) => c,
             None => "bitcoin"
         };
-        return real_coin.to_string();
+        real_coin.to_string()
     }
 
     pub fn handle_message(&self, msg: &str) -> Option<String> {
@@ -58,7 +58,7 @@ impl Replies {
                                     self.format_currency(p.max), self.format_change(p.change));
             output = Some(response);
         }
-        return output;
+        output
     }
 
     fn format_currency(&self, value: f32) -> String {
@@ -76,6 +76,6 @@ impl Replies {
             return format!("\x0305Down: {:.2}%", diff.abs());
         }
 
-        return format!("\x0303Up: {:.2}%", diff);
+        format!("\x0303Up: {:.2}%", diff)
     }
 }
