@@ -16,7 +16,7 @@ impl Replies {
 
     fn get_coin(&self, coin: String) -> String {
 
-        if self.db.all_coins.contains_key(&coin) {
+        if self.db.all_coins.contains(&coin) {
             return coin;
         }
 
@@ -32,7 +32,7 @@ impl Replies {
             let words: Vec<&str> = msg.split_whitespace().collect();
             let coin = match words.len() {
                 1 => "bitcoin".to_string(),
-                _ => words[1].to_string(),
+                _ => words[1].to_string().to_lowercase(),
             };
             return self.get_latest_price(self.get_coin(coin));
         }

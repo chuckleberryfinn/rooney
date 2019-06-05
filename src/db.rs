@@ -1,10 +1,12 @@
+use std::collections::{HashMap, HashSet};
+use std::iter::FromIterator;
+
 use postgres::{Connection, TlsMode};
-use std::collections::HashMap;
 
 
 pub struct DB {
     pub connection: Connection,
-    pub all_coins: HashMap<String, String>,
+    pub all_coins: HashSet<String>,
     pub nicks_coins: HashMap<String, String>,
 }
 
@@ -12,8 +14,8 @@ impl DB {
     pub fn new() -> Self {
         let config = "postgresql://nemo@%2Fvar%2Frun%2Fpostgresql";
         let c = Connection::connect(config, TlsMode::None).expect("Error connection to database");
-        let all_coins = DB::get_coins(&c);
-        let nicks_coins = DB::get_nicks(&all_coins);
+        let nicks_coins = DB::get_nicks(&c);
+        let all_coins = DB::get_coins(&nicks_coins);
 
         dbg!("Connection ok");
 
@@ -31,24 +33,20 @@ impl DB {
         rows.get(0).get(0)
     }
 
-    fn get_coins(connection: &Connection) -> HashMap<String, String> {
-        let mut all_coins = HashMap::new();
-        let query = "Select name, ticker from coins";
+    fn get_nicks(connection: &Connection) -> HashMap<String, String> {
+        let mut nicks_coins = HashMap::new();
+        let query = "Select ticker, name from coins";
 
         for row in &connection.query(&query, &[]).unwrap() {
-            all_coins.insert(row.get(0), row.get(1));
+            let (t, n): (String, String) = (row.get(0), row.get(1));
+            nicks_coins.insert(t.to_lowercase(), n.to_lowercase());
         }
 
-        all_coins
+        nicks_coins
     }
 
-    fn get_nicks(all_coins: &HashMap<String, String>) -> HashMap<String, String> {
-        let mut nicks_coins = HashMap::new();
-
-        for (k, v) in all_coins.iter() {
-            nicks_coins.insert(v.clone(), k.clone());
-        }
-        nicks_coins
+    fn get_coins(nicks_coins: &HashMap<String, String>) -> HashSet<String> {
+        HashSet::from_iter(nicks_coins.values().cloned())
     }
 
     pub fn get_latest_price(&self, coin: String) -> Option<Price> {
