@@ -49,16 +49,15 @@ impl Replies {
     }
 
     fn get_latest_price(&self, coin: String) -> Option<String> {
-        let mut output = None;
         let price = self.db.get_latest_price(coin);
         if let Some(p) = price {
             let response = format!("Current price for {} ({}): €{} ${} 24h Low: €{} Median: €{} 24h High: €{} {} Today",
                                     titlecase(&p.name), p.ticker.to_uppercase(), self.format_currency(p.euro),
                                     self.format_currency(p.dollar), self.format_currency(p.min), self.format_currency(p.median),
                                     self.format_currency(p.max), self.format_change(p.change));
-            output = Some(response);
+            return Some(response);
         }
-        output
+        None
     }
 
     fn format_currency(&self, value: f32) -> String {
@@ -69,7 +68,6 @@ impl Replies {
         let v = (value * 100.0).round() / 100.0;
         v.separated_string()
     }
-
 
     fn format_change(&self, diff: f32) -> String {
         if diff < 0.0 {
