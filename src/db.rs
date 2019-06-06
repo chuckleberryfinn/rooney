@@ -3,7 +3,6 @@ use std::iter::FromIterator;
 
 use postgres::{Connection, TlsMode};
 
-
 pub struct DB {
     pub connection: Connection,
     pub all_coins: HashSet<String>,
@@ -29,13 +28,13 @@ impl DB {
     pub fn get_advice(&self) -> String {
         let query = "select response from advice offset floor(random()*(select count(*) from advice)) limit 1;";
 
-        let rows = self.connection.query(&query, &[]).unwrap();
+        let rows = self.connection.query(query, &[]).unwrap();
         rows.get(0).get(0)
     }
 
     fn get_nicks(connection: &Connection) -> HashMap<String, String> {
         let query = "Select ticker, name from coins";
-        connection.query(&query, &[]).unwrap().iter().map(|r| (r.get(0), r.get(1))).collect::<HashMap<String, String>>()
+        connection.query(query, &[]).unwrap().iter().map(|r| (r.get(0), r.get(1))).collect::<HashMap<String, String>>()
     }
 
     fn get_coins(nicks_coins: &HashMap<String, String>) -> HashSet<String> {
@@ -83,7 +82,7 @@ impl DB {
                     join first_price as fp using(name)
                     join median_prices using(name)";
 
-        let rows = &self.connection.query(&query, &[&coin]).unwrap();
+        let rows = self.connection.query(query, &[&coin]).unwrap();
         if rows.len() == 0 {
             return None;
         }

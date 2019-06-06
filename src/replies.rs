@@ -16,7 +16,6 @@ impl Replies {
     }
 
     fn get_coin(&self, coin: String) -> String {
-
         if self.db.all_coins.contains(&coin) {
             return coin;
         }
