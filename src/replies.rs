@@ -101,8 +101,8 @@ impl fmt::Display for db::Price {
 
 impl fmt::Display for db::ATS {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "All time Low/High Prices for {}, Lowest: {} Highest: {}",
-            self.name, self.lowest, self.highest
+        write!(f, "All time \x0305Low\x03/\x0303High\x03 Prices for {}, Lowest: \x0305€{}\x03 Highest: \x0303{}\x03",
+            self.name, Replies::format_currency(self.lowest), Replies::format_currency(self.highest)
         )
     }
 }
