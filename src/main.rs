@@ -12,11 +12,12 @@ fn main() {
     client.identify().unwrap();
 
     reactor.register_client_with_handler(client, move |client, message| {
-        if let Command::PRIVMSG(ref _target, ref msg) = message.command {
+        if let Command::PRIVMSG(ref target, ref msg) = message.command {
             match replies.handle_message(&msg) {
                 Some(response) => client.send_privmsg(message.response_target().unwrap(), response)?,
                 None => (),
             }
+            println!("{} said {} to {}", message.source_nickname().unwrap(), msg, target);
         }
 
         Ok(())
