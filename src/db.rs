@@ -83,20 +83,22 @@ impl DB {
                     join first_price as fp using(name)
                     join median_prices using(name)";
 
-        for row in &self.connection.query(&query, &[&coin]).unwrap() {
-            return Some(Price {
-                name: row.get(0),
-                ticker: row.get(1),
-                euro: row.get(2),
-                dollar: row.get(3),
-                min: row.get(4),
-                max: row.get(5),
-                change: row.get(6),
-                median: row.get(7),
-            });
+        let rows = &self.connection.query(&query, &[&coin]).unwrap();
+        if rows.len() == 0 {
+            return None;
         }
 
-        None
+        let row = rows.get(0);
+        return Some(Price {
+            name: row.get(0),
+            ticker: row.get(1),
+            euro: row.get(2),
+            dollar: row.get(3),
+            min: row.get(4),
+            max: row.get(5),
+            change: row.get(6),
+            median: row.get(7),
+        });
     }
 }
 
