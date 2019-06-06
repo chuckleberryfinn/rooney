@@ -110,7 +110,7 @@ impl DB {
                         join coins using(coin_id)
                         where name = $1
                     )
-                    select min(lowest) as lowest, max(ath) as ath
+                    select cast(min(lowest) as real) as lowest, cast(max(ath) as real) as ath
                     from all_ats";
 
         let rows = self.connection.query(query, &[&coin]).unwrap();
