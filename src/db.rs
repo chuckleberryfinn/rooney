@@ -16,8 +16,6 @@ impl DB {
         let nicks_coins = DB::get_nicks(&c);
         let all_coins = DB::get_coins(&nicks_coins);
 
-        info!("Connection ok");
-
         Self {
             all_coins: all_coins,
             nicks_coins: nicks_coins,
@@ -88,7 +86,7 @@ impl DB {
         }
 
         let row = rows.get(0);
-        return Some(Price {
+        Some(Price {
             name: row.get(0),
             ticker: row.get(1),
             euro: row.get(2),
@@ -97,8 +95,40 @@ impl DB {
             max: row.get(5),
             change: row.get(6),
             median: row.get(7),
-        });
+        })
     }
+
+    pub fn get_ats(&self, coin: String) -> Option<ATS> {
+        let query =
+                    "with all_ats as (
+                        select min(euro) as lowest, max(euro) as ath
+                        from prices
+                        join coins using(coin_id)
+                        where name = $1
+                        union select min_euro as lowest, max_euro as ath
+                        from daily_stats
+                        join coins using(coin_id)
+                        where name = $1
+                    )
+                    select min(lowest) as lowest, max(ath) as ath
+                    from all_ats";
+
+        let rows = self.connection.query(query, &[&coin]).unwrap();
+        if rows.len() == 0 {
+            return None;
+        }
+
+        let row = rows.get(0);
+        Some(ATS {
+            lowest: row.get(0),
+            highest: row.get(1)
+        })
+    }
+}
+
+pub struct ATS {
+    pub lowest: f32,
+    pub highest: f32,
 }
 
 pub struct Price {
