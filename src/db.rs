@@ -109,9 +109,39 @@ impl DB {
                         from daily_stats
                         join coins using(coin_id)
                         where name = $1
+                    ),
+                    extremes as (
+                        select min(lowest) as minimum, max(ath) as ath
+                        from all_ats
+                    ),
+                    lowest as (
+                        select time::date as date, euro as price
+                        from prices
+                        join coins using(coin_id)
+                        where euro=(select minimum from extremes)
+                        and name = $1
+                        union select date, min_euro as price
+                        from daily_stats
+                        join coins using(coin_id)
+                        where min_euro=(select minimum from extremes)
+                        and name = $1
+                        limit 1
+                    ),
+                    highest as (
+                        select time::date as date, euro as price
+                        from prices
+                        join coins using(coin_id)
+                        where euro=(select ath from extremes)
+                        and name = $1
+                        union select date, max_euro as price
+                        from daily_stats
+                        join coins using(coin_id)
+                        where max_euro=(select ath from extremes)
+                        and name = $1
+                        limit 1
                     )
-                    select cast(min(lowest) as real) as lowest, cast(max(ath) as real) as ath
-                    from all_ats";
+                    select date, cast(price as real) from lowest union select date, cast(price as real) from highest
+                    order by price asc";
 
         let rows = self.connection.query(query, &[&coin]).unwrap();
         if rows.len() == 0 {
@@ -121,8 +151,10 @@ impl DB {
         let row = rows.get(0);
         Some(ATS {
             name: coin,
-            lowest: row.get(0),
-            highest: row.get(1)
+            lowest_date: row.get(0),
+            lowest: row.get(1),
+            highest_date: row.get(2),
+            highest: row.get(3)
         })
     }
 }
@@ -130,7 +162,9 @@ impl DB {
 pub struct ATS {
     pub name: String,
     pub lowest: f32,
-    pub highest: f32
+    pub lowest_date: String,
+    pub highest: f32,
+    pub highest_date: String,
 }
 
 pub struct Price {
