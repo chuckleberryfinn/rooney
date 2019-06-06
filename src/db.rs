@@ -17,7 +17,7 @@ impl DB {
         let nicks_coins = DB::get_nicks(&c);
         let all_coins = DB::get_coins(&nicks_coins);
 
-        dbg!("Connection ok");
+        info!("Connection ok");
 
         Self {
             all_coins: all_coins,
