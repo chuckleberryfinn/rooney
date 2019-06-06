@@ -140,7 +140,7 @@ impl DB {
                         and name = $1
                         limit 1
                     )
-                    select date, cast(price as real) from lowest union select date, cast(price as real) from highest
+                    select to_char(date, 'YYYY-mm-dd'), cast(price as real) from lowest union select to_char(date, 'YYYY-mm-dd'), cast(price as real) from highest
                     order by price asc";
 
         let rows = self.connection.query(query, &[&coin]).unwrap();
