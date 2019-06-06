@@ -1,4 +1,5 @@
 use crate::db;
+use std::fmt;
 
 use separator::Separatable;
 use titlecase::titlecase;
@@ -51,16 +52,12 @@ impl Replies {
     fn get_latest_price(&self, coin: String) -> Option<String> {
         let price = self.db.get_latest_price(coin);
         if let Some(p) = price {
-            let response = format!("Current price for {} ({}): €{} ${} 24h Low: €{} Median: €{} 24h High: €{} {} Today",
-                                    titlecase(&p.name), p.ticker.to_uppercase(), self.format_currency(p.euro),
-                                    self.format_currency(p.dollar), self.format_currency(p.min), self.format_currency(p.median),
-                                    self.format_currency(p.max), self.format_change(p.change));
-            return Some(response);
+            return Some(format!("{}", p));
         }
         None
     }
 
-    fn format_currency(&self, value: f32) -> String {
+    pub fn format_currency(value: f32) -> String {
         if value < 1.0 {
             return format!("{:.8}", value);
         }
@@ -69,11 +66,20 @@ impl Replies {
         v.separated_string()
     }
 
-    fn format_change(&self, diff: f32) -> String {
+    pub fn format_change(diff: f32) -> String {
         if diff < 0.0 {
             return format!("\x0305Down: {:.2}%", diff.abs());
         }
 
         format!("\x0303Up: {:.2}%", diff)
+    }
+}
+
+impl fmt::Display for db::Price {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Current price for {} ({}): €{} ${} 24h Low: €{} Median: €{} 24h High: €{} {} Today",
+                    titlecase(&self.name), self.ticker.to_uppercase(), Replies::format_currency(self.euro),
+                    Replies::format_currency(self.dollar), Replies::format_currency(self.min), Replies::format_currency(self.median),
+                    Replies::format_currency(self.max), Replies::format_change(self.change))
     }
 }
