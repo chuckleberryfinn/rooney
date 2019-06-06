@@ -1,3 +1,7 @@
+#[macro_use]
+extern crate log;
+extern crate std_logger;
+
 mod db;
 mod replies;
 
@@ -9,6 +13,8 @@ fn main() {
     let mut reactor = IrcReactor::new().unwrap();
     let client = reactor.prepare_client_and_connect(&config).unwrap();
     let replies = replies::Replies::new();
+    std_logger::init();
+
     client.identify().unwrap();
 
     reactor.register_client_with_handler(client, move |client, message| {
@@ -17,7 +23,7 @@ fn main() {
                 Some(response) => client.send_privmsg(message.response_target().unwrap(), response)?,
                 None => (),
             }
-            println!("{} said {} to {}", message.source_nickname().unwrap(), msg, target);
+            info!("{} said {} to {}", message.source_nickname().unwrap(), msg, target);
         }
 
         Ok(())
