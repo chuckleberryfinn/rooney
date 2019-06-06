@@ -120,6 +120,7 @@ impl DB {
 
         let row = rows.get(0);
         Some(ATS {
+            name: coin,
             lowest: row.get(0),
             highest: row.get(1)
         })
@@ -127,8 +128,9 @@ impl DB {
 }
 
 pub struct ATS {
+    pub name: String,
     pub lowest: f32,
-    pub highest: f32,
+    pub highest: f32
 }
 
 pub struct Price {

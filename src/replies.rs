@@ -45,6 +45,14 @@ impl Replies {
             return Some(self.db.get_advice());
         }
 
+        if msg.starts_with("!ats") {
+            let words: Vec<&str> = msg.split_whitespace().collect();
+            let coin = match words.len() {
+                1 => "bitcoin".to_string(),
+                _ => words[1].to_string().to_lowercase(),
+            };
+            return self.get_ats(coin);
+        };
         None
     }
 
@@ -52,6 +60,14 @@ impl Replies {
         let price = self.db.get_latest_price(coin);
         if let Some(p) = price {
             return Some(format!("{}", p));
+        }
+        None
+    }
+
+    fn get_ats(&self, coin: String) -> Option<String> {
+        let ats = self.db.get_ats(coin);
+        if let Some(a) = ats {
+            return Some(format!("{}", a));
         }
         None
     }
@@ -80,5 +96,13 @@ impl fmt::Display for db::Price {
                     titlecase(&self.name), self.ticker.to_uppercase(), Replies::format_currency(self.euro),
                     Replies::format_currency(self.dollar), Replies::format_currency(self.min), Replies::format_currency(self.median),
                     Replies::format_currency(self.max), Replies::format_change(self.change))
+    }
+}
+
+impl fmt::Display for db::ATS {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "All time Low/High Prices for {}, Lowest: {} Highest: {}",
+            self.name, self.lowest, self.highest
+        )
     }
 }
