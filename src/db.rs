@@ -34,15 +34,8 @@ impl DB {
     }
 
     fn get_nicks(connection: &Connection) -> HashMap<String, String> {
-        let mut nicks_coins = HashMap::new();
         let query = "Select ticker, name from coins";
-
-        for row in &connection.query(&query, &[]).unwrap() {
-            let (t, n): (String, String) = (row.get(0), row.get(1));
-            nicks_coins.insert(t.to_lowercase(), n.to_lowercase());
-        }
-
-        nicks_coins
+        connection.query(&query, &[]).unwrap().iter().map(|r| (r.get(0), r.get(1))).collect::<HashMap<String, String>>()
     }
 
     fn get_coins(nicks_coins: &HashMap<String, String>) -> HashSet<String> {
