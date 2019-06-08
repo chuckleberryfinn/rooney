@@ -51,7 +51,7 @@ impl Replies {
                 1 => "bitcoin".to_string(),
                 _ => words[1].to_string().to_lowercase(),
             };
-            return self.get_ats(coin);
+            return self.get_ats(self.get_coin(coin));
         };
         None
     }
