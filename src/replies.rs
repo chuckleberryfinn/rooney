@@ -29,12 +29,7 @@ impl Replies {
 
     pub fn handle_message(&self, msg: &str) -> Option<String> {
         if msg.starts_with("!coin") || msg.starts_with("!crack") {
-            let words: Vec<&str> = msg.split_whitespace().collect();
-            let coin = match words.len() {
-                1 => "bitcoin".to_string(),
-                _ => words[1].to_string().to_lowercase(),
-            };
-            return self.get_latest_price(self.get_coin(coin));
+            return self.get_latest_price(self.get_coin(self.parse_coin_arg(msg)));
         }
 
         if msg.contains("github") {
@@ -46,14 +41,17 @@ impl Replies {
         }
 
         if msg.starts_with("!ats") {
-            let words: Vec<&str> = msg.split_whitespace().collect();
-            let coin = match words.len() {
-                1 => "bitcoin".to_string(),
-                _ => words[1].to_string().to_lowercase(),
-            };
-            return self.get_ats(self.get_coin(coin));
+            return self.get_ats(self.get_coin(self.parse_coin_arg(msg)));
         };
         None
+    }
+
+    fn parse_coin_arg(&self, msg: &str) -> String {
+        let words: Vec<&str> = msg.split_whitespace().collect();
+        match words.len() {
+            1 => "bitcoin".to_string(),
+             _ => words[1].to_string().to_lowercase(),
+        }
     }
 
     fn get_latest_price(&self, coin: String) -> Option<String> {
