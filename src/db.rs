@@ -1,7 +1,7 @@
 use std::collections::{HashMap, HashSet};
 use std::iter::FromIterator;
 
-use chrono::{DateTime, Utc};
+use chrono::NaiveDate;
 use postgres::{Connection, TlsMode};
 
 pub struct DB {
@@ -145,17 +145,17 @@ impl DB {
                     order by price asc";
 
         let rows = self.connection.query(query, &[&coin]).unwrap();
-        if rows.len() == 0 {
+        if rows.len() < 2 {
             return None;
         }
 
-        let row = rows.get(0);
+        let (lowest, highest) = (rows.get(0), rows.get(1));
         Some(ATS {
             name: coin,
-            lowest_date: row.get(0),
-            lowest: row.get(1),
-            highest_date: row.get(2),
-            highest: row.get(3)
+            lowest_date: lowest.get(0),
+            lowest: lowest.get(1),
+            highest_date: highest.get(0),
+            highest: highest.get(1)
         })
     }
 }
@@ -163,9 +163,9 @@ impl DB {
 pub struct ATS {
     pub name: String,
     pub lowest: f32,
-    pub lowest_date: DateTime<Utc>,
+    pub lowest_date: NaiveDate,
     pub highest: f32,
-    pub highest_date: DateTime<Utc>,
+    pub highest_date: NaiveDate,
 }
 
 pub struct Price {
