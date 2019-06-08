@@ -15,18 +15,6 @@ impl Replies {
         }
     }
 
-    fn get_coin(&self, coin: String) -> String {
-        if self.db.all_coins.contains(&coin) {
-            return coin;
-        }
-
-        let real_coin = match self.db.nicks_coins.get(&coin) {
-            Some(c) => c,
-            None => "bitcoin"
-        };
-        real_coin.to_string()
-    }
-
     pub fn handle_message(&self, msg: &str) -> Option<String> {
         if msg.starts_with("!coin") || msg.starts_with("!crack") {
             return self.get_latest_price(self.get_coin(self.parse_coin_arg(msg)));
@@ -54,6 +42,18 @@ impl Replies {
         }
     }
 
+    fn get_coin(&self, coin: String) -> String {
+        if self.db.all_coins.contains(&coin) {
+            return coin;
+        }
+
+        let real_coin = match self.db.nicks_coins.get(&coin) {
+            Some(c) => c,
+            None => "bitcoin"
+        };
+        real_coin.to_string()
+    }
+    
     fn get_latest_price(&self, coin: String) -> Option<String> {
         let price = self.db.get_latest_price(coin);
         if let Some(p) = price {
