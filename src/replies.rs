@@ -30,7 +30,8 @@ impl Replies {
 
         if msg.starts_with("!ats") {
             return self.get_ats(self.get_coin(self.parse_coin_arg(msg)));
-        };
+        }
+
         None
     }
 
@@ -51,14 +52,16 @@ impl Replies {
             Some(c) => c,
             None => "bitcoin"
         };
+
         real_coin.to_string()
     }
-    
+
     fn get_latest_price(&self, coin: String) -> Option<String> {
         let price = self.db.get_latest_price(coin);
         if let Some(p) = price {
             return Some(format!("{}", p));
         }
+
         None
     }
 
@@ -67,6 +70,7 @@ impl Replies {
         if let Some(a) = ats {
             return Some(format!("{}", a));
         }
+
         None
     }
 
@@ -76,6 +80,7 @@ impl Replies {
         }
 
         let v = (value * 100.0).round() / 100.0;
+
         v.separated_string()
     }
 
