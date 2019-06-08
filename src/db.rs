@@ -1,6 +1,7 @@
 use std::collections::{HashMap, HashSet};
 use std::iter::FromIterator;
 
+use chrono::{DateTime, Utc};
 use postgres::{Connection, TlsMode};
 
 pub struct DB {
@@ -140,7 +141,7 @@ impl DB {
                         and name = $1
                         limit 1
                     )
-                    select to_char(date, 'YYYY-mm-dd'), cast(price as real) from lowest union select to_char(date, 'YYYY-mm-dd'), cast(price as real) from highest
+                    select date, cast(price as real) from lowest union select date, cast(price as real) from highest
                     order by price asc";
 
         let rows = self.connection.query(query, &[&coin]).unwrap();
@@ -162,9 +163,9 @@ impl DB {
 pub struct ATS {
     pub name: String,
     pub lowest: f32,
-    pub lowest_date: String,
+    pub lowest_date: DateTime<Utc>,
     pub highest: f32,
-    pub highest_date: String,
+    pub highest_date: DateTime<Utc>,
 }
 
 pub struct Price {
