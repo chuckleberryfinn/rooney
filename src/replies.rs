@@ -138,6 +138,6 @@ impl fmt::Display for db::ATS {
 
 impl fmt::Display for db::Mover {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{} ({}) {}", titlecase(&self.name), self.ticker.to_uppercase(), Replies::format_change(self.diff))
+        write!(f, "{} ({}) {} Today\x03", titlecase(&self.name), self.ticker.to_uppercase(), Replies::format_change(self.diff))
     }
 }
