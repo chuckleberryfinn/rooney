@@ -79,7 +79,7 @@ impl Replies {
     }
 
     fn get_bulls(&self) -> Option<String> {
-        let movers = self.db.get_movers("asc");
+        let movers = self.db.get_movers("asc".to_string());
         if let Some(ms) = movers {
             return Some(ms.into_iter().map(|m| format!("{}", m)).collect::<Vec<String>>().join(" "));
         }

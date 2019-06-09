@@ -159,7 +159,7 @@ impl DB {
         })
     }
 
-    pub fn get_movers(&self, sort: &str) -> Option<Vec<Mover>> {
+    pub fn get_movers(&self, sort: String) -> Option<Vec<Mover>> {
         let query =
             "with movers as (
                 select distinct coin_id, first_value(euro) over w as first, last_value(euro) over w as last
