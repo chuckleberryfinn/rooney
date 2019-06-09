@@ -191,7 +191,7 @@ impl DB {
 
     pub fn get_stats(&self, coin: String, date: NaiveDate) -> Option<Stats> {
         let query =
-            "select name, ticker, date, min_euro, average_euro, median_euro, std_dev, max_euro
+            "select name, ticker, date, cast(min_euro as real), cast(average_euro as real), cast(median_euro as real), cast(std_dev as real), cast(max_euro as real)
                 from daily_stats
                 join coins using(coin_id)
                 where name = $1
