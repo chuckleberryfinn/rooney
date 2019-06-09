@@ -58,21 +58,21 @@ impl Replies {
     }
 
     fn parse_coin_amount(&self, msg: &str) -> (String, f32) {
-        let coin = "bitcoin".to_string();
+        let coin = self.get_coin(self.parse_coin_arg(msg));
         let amount = 1.0;
         let words: Vec<&str> = msg.split_whitespace().collect();
 
         if words.len() == 2 {
             return match f32::from_str(words[1]) {
-                Err(_e) => (self.get_coin(words[1].to_string().to_lowercase()), amount),
                 Ok(f) => (coin, f),
+                Err(_e) => (coin, amount),
             };
         }
 
         if words.len() > 2 {
             return match f32::from_str(words[2]) {
-                Err(_e) => (self.get_coin(words[1].to_string().to_lowercase()), amount),
-                Ok(f) => (self.get_coin(words[1].to_string().to_lowercase()), f),
+                Ok(f) => (coin, f),
+                Err(_e) => (coin, amount),
             };
         }
 
