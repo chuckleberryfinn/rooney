@@ -242,7 +242,7 @@ impl fmt::Display for db::Stats {
 
 impl fmt::Display for db::Diff {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Diff for {} ({}) from {} to {}: First: €{} Latest: €{} Diff: {}",
+        write!(f, "Diff for {} ({}) from {} to {}: First: €{} Latest: €{} Diff: {} To Date",
                 titlecase(&self.name), self.ticker.to_uppercase(), self.start, self.end,
                 Replies::format_currency(self.first), Replies::format_currency(self.last), Replies::format_change(self.diff))
     }
