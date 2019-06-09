@@ -52,6 +52,11 @@ impl Replies {
             return self.get_stats(coin, date);
         }
 
+        if msg.starts_with("!diff") {
+            let (coin, date) = self.parse_coin_date(msg);
+            return self.get_diff(coin, date);
+        }
+
         None
     }
 
@@ -175,6 +180,15 @@ impl Replies {
         None
     }
 
+    fn get_diff(&self, coin: String, date: NaiveDate) -> Option<String> {
+        let diff = self.db.get_diff(coin, date);
+        if let Some(d) = diff {
+            return Some(format!("{}", d));
+        }
+
+        None
+    }
+
     fn format_currency(value: f32) -> String {
         if value < 1.0 {
             return format!("{:.8}", value);
@@ -223,5 +237,13 @@ impl fmt::Display for db::Stats {
                 titlecase(&self.name), self.ticker.to_uppercase(), self.date, Replies::format_currency(self.min),
                 Replies::format_currency(self.average), Replies::format_currency(self.std_dev),
                 Replies::format_currency(self.median), Replies::format_currency(self.max))
+    }
+}
+
+impl fmt::Display for db::Diff {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Diff for {} ({}) from {} to {}: First: €{} Latest: €{} Diff: {}",
+                titlecase(&self.name), self.ticker.to_uppercase(), self.start, self.end,
+                Replies::format_currency(self.first), Replies::format_currency(self.last), Replies::format_change(self.diff))
     }
 }
