@@ -92,7 +92,7 @@ impl Replies {
 
     fn parse_coin_date(&self, msg: &str) -> (String, NaiveDate) {
         let coin = self.get_coin(self.parse_coin_arg(msg));
-        let date = Utc::today().naive_utc() - Duration::days(1);
+        let date = Utc::today().naive_local() - Duration::days(1);
         let words: Vec<&str> = msg.split_whitespace().collect();
 
         if words.len() == 2 {
