@@ -1,5 +1,6 @@
 use crate::db;
 use std::fmt;
+use std::str::FromStr;
 
 use separator::Separatable;
 use titlecase::titlecase;
@@ -40,6 +41,11 @@ impl Replies {
             return self.get_bears();
         }
 
+        if msg == "!fiat" {
+            let (coin, amount) = self.parse_coin_amount(msg);
+            return self.get_fiat(coin, amount);
+        }
+
         None
     }
 
@@ -49,6 +55,28 @@ impl Replies {
             1 => "bitcoin".to_string(),
              _ => words[1].to_string().to_lowercase(),
         }
+    }
+
+    fn parse_coin_amount(&self, msg: &str) -> (String, f32) {
+        let coin = "Bitcoin".to_string();
+        let amount = 1.0;
+        let words: Vec<&str> = msg.split_whitespace().collect();
+
+        if words.len() == 2 {
+            return match f32::from_str(words[1]) {
+                Err(_e) => (self.get_coin(words[1].to_string().to_lowercase()), amount),
+                Ok(f) => (coin, f),
+            };
+        }
+
+        if words.len() > 2 {
+            return match f32::from_str(words[2]) {
+                Err(_e) => (self.get_coin(words[1].to_string().to_lowercase()), amount),
+                Ok(f) => (self.get_coin(words[1].to_string().to_lowercase()), f),
+            };
+        }
+
+        return (coin, amount);
     }
 
     fn get_coin(&self, coin: String) -> String {
@@ -95,6 +123,16 @@ impl Replies {
         let movers = self.db.get_bears();
         if let Some(ms) = movers {
             return Some(ms.into_iter().map(|m| format!("{}", m)).collect::<Vec<String>>().join(" "));
+        }
+
+        None
+    }
+
+    fn get_fiat(&self, coin: String, amount: f32) -> Option<String> {
+        let price = self.db.get_latest_price(coin);
+        if let Some(p) = price {
+            return Some(format!("{} {} ({}) is worth €{} at €{} per coin", amount, &p.name, p.ticker.to_uppercase(),
+                                Replies::format_currency(amount * p.euro), Replies::format_currency(p.euro)))
         }
 
         None
