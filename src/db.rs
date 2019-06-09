@@ -171,7 +171,7 @@ impl DB {
                     partition by coin_id order by time range between unbounded preceding and unbounded
                     following) order by coin_id
             )
-            select name, ticker, first, last, (last-first)*100/first as diff
+            select name, ticker, first, last, cast((last-first)*100/first as real) as diff
             from movers
             join coins using(coin_id)
             order by diff {} limit 3;", sort);
@@ -180,8 +180,6 @@ impl DB {
         if rows.len() < 3 {
             return None;
         }
-
-        dbg!(rows.get(0));
 
         Some(rows.into_iter().map(|r| Mover {name: r.get(0), ticker: r.get(1), diff: r.get(4)}).collect::<Vec<Mover>>())
     }
