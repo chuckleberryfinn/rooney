@@ -169,7 +169,8 @@ impl DB {
 
     fn get_movers(&self, sort: &str) -> Option<Vec<Mover>> {
         let query =
-            format!("with movers as (
+            format!(
+            "with movers as (
                 select distinct coin_id, first_value(euro) over w as first, last_value(euro) over w as last
                 from prices where time::date=(select max(time)::date from prices) WINDOW w as (
                     partition by coin_id order by time range between unbounded preceding and unbounded
