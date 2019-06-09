@@ -2,6 +2,7 @@ use crate::db;
 use std::fmt;
 use std::str::FromStr;
 
+use chrono::{Duration, NaiveDate, Utc};
 use separator::Separatable;
 use titlecase::titlecase;
 
@@ -46,6 +47,11 @@ impl Replies {
             return self.get_fiat(coin, amount);
         }
 
+        if msg.starts_with("!stats") {
+            let (coin, date) = self.parse_coin_date(msg);
+            return self.get_stats(coin, date);
+        }
+
         None
     }
 
@@ -77,6 +83,28 @@ impl Replies {
         }
 
         return (coin, amount);
+    }
+
+    fn parse_coin_date(&self, msg: &str) -> (String, NaiveDate) {
+        let coin = self.get_coin(self.parse_coin_arg(msg));
+        let date = Utc::today().naive_utc() - Duration::days(1);
+        let words: Vec<&str> = msg.split_whitespace().collect();
+
+        if words.len() == 2 {
+            return match NaiveDate::from_str(words[1]) {
+                Ok(f) => (coin, f),
+                Err(_e) => (coin, date),
+            };
+        }
+
+        if words.len() > 2 {
+            return match NaiveDate::from_str(words[2]) {
+                Ok(f) => (coin, f),
+                Err(_e) => (coin, date),
+            };
+        }
+
+        return (coin, date);
     }
 
     fn get_coin(&self, coin: String) -> String {
@@ -138,6 +166,15 @@ impl Replies {
         None
     }
 
+    fn get_stats(&self, coin: String, date: NaiveDate) -> Option<String> {
+        let stats = self.db.get_stats(coin, date);
+        if let Some(s) = stats {
+            return Some(format!("{}", s));
+        }
+        
+        None
+    }
+
     fn format_currency(value: f32) -> String {
         if value < 1.0 {
             return format!("{:.8}", value);
@@ -177,5 +214,14 @@ impl fmt::Display for db::ATS {
 impl fmt::Display for db::Mover {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{} ({}) {} Today\x03", titlecase(&self.name), self.ticker.to_uppercase(), Replies::format_change(self.diff))
+    }
+}
+
+impl fmt::Display for db::Stats {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Stats for {} ({}) on {}: Min €{} Mean €{} Std Dev €{} Median €{} Max €{}",
+                titlecase(&self.name), self.ticker.to_uppercase(), self.date, Replies::format_currency(self.min),
+                Replies::format_currency(self.average), Replies::format_currency(self.std_dev),
+                Replies::format_change(self.median), Replies::format_change(self.max))
     }
 }

@@ -188,6 +188,33 @@ impl DB {
 
         Some(rows.into_iter().map(|r| Mover {name: r.get(0), ticker: r.get(1), diff: r.get(4)}).collect::<Vec<Mover>>())
     }
+
+    pub fn get_stats(&self, coin: String, date: NaiveDate) -> Option<Stats> {
+        let query =
+            "select name, ticker, date, min_euro, average_euro, median_euro, std_dev, max_euro
+                from daily_stats
+                join coins using(coin_id)
+                where name = $1
+                and date = $2";
+        let rows = self.connection.query(&query, &[&coin, &date]).unwrap();
+
+        if rows.len() == 0 {
+            return None;
+        }
+
+        let row = rows.get(0);
+        Some(Stats{
+            name: row.get(0),
+            ticker: row.get(1),
+            date: row.get(2),
+            min: row.get(3),
+            average: row.get(4),
+            median: row.get(5),
+            std_dev: row.get(6),
+            max: row.get(7),
+        })
+    }
+
 }
 
 pub struct ATS {
@@ -213,4 +240,15 @@ pub struct Mover {
     pub name: String,
     pub ticker: String,
     pub diff: f32
+}
+
+pub struct Stats {
+    pub name: String,
+    pub ticker: String,
+    pub date: NaiveDate,
+    pub min: f32,
+    pub average: f32,
+    pub median: f32,
+    pub std_dev: f32,
+    pub max: f32,
 }
