@@ -171,7 +171,7 @@ impl Replies {
         if let Some(s) = stats {
             return Some(format!("{}", s));
         }
-        
+
         None
     }
 
@@ -222,6 +222,6 @@ impl fmt::Display for db::Stats {
         write!(f, "Stats for {} ({}) on {}: Min €{} Mean €{} Std Dev €{} Median €{} Max €{}",
                 titlecase(&self.name), self.ticker.to_uppercase(), self.date, Replies::format_currency(self.min),
                 Replies::format_currency(self.average), Replies::format_currency(self.std_dev),
-                Replies::format_change(self.median), Replies::format_change(self.max))
+                Replies::format_currency(self.median), Replies::format_currency(self.max))
     }
 }
