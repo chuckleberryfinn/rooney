@@ -158,6 +158,27 @@ impl DB {
             highest: highest.get(1)
         })
     }
+
+    pub fn get_movers(&self, sort: &str) -> Option<Vec<Mover>> {
+        let query =
+            "with movers as (
+                select distinct coin_id, first_value(euro) over w as first, last_value(euro) over w as last
+                from prices where time::date=(select max(time)::date from prices) WINDOW w as (
+                    partition by coin_id order by time range between unbounded preceding and unbounded
+                    following) order by coin_id
+            )
+            select name, ticker, first, last, (last-first)*100/first as diff
+            from movers
+            join coins using(coin_id)
+            order by diff $1 limit 3;";
+
+        let rows = self.connection.query(query, &[&sort]).unwrap();
+        if rows.len() < 3 {
+            return None;
+        }
+
+        Some(rows.into_iter().map(|r| Mover {name: r.get(0), ticker: r.get(1), diff: r.get(4)}).collect::<Vec<Mover>>())
+    }
 }
 
 pub struct ATS {
@@ -177,4 +198,10 @@ pub struct Price {
     pub max: f32,
     pub change: f32,
     pub median: f32
+}
+
+pub struct Mover {
+    pub name: String,
+    pub ticker: String,
+    pub diff: f32
 }

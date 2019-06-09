@@ -32,6 +32,10 @@ impl Replies {
             return self.get_ats(self.get_coin(self.parse_coin_arg(msg)));
         }
 
+        if msg == "!bulls" {
+            return self.get_bulls();
+        }
+
         None
     }
 
@@ -74,6 +78,15 @@ impl Replies {
         None
     }
 
+    fn get_bulls(&self) -> Option<String> {
+        let movers = self.db.get_movers("asc");
+        if let Some(ms) = movers {
+            return Some(ms.into_iter().map(|m| format!("{}", m)).collect::<Vec<String>>().join(" "));
+        }
+
+        None
+    }
+
     pub fn format_currency(value: f32) -> String {
         if value < 1.0 {
             return format!("{:.8}", value);
@@ -107,5 +120,11 @@ impl fmt::Display for db::ATS {
         write!(f, "All time \x0305Low\x03/\x0303High\x03 Prices for {}, Lowest: \x0305€{}\x03 on {} Highest: \x0303€{}\x03 on {}",
             titlecase(&self.name), Replies::format_currency(self.lowest), self.lowest_date, Replies::format_currency(self.highest), self.highest_date
         )
+    }
+}
+
+impl fmt::Display for db::Mover {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{} ({}) {}", titlecase(&self.name), self.ticker.to_uppercase(), Replies::format_change(self.diff))
     }
 }
