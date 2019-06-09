@@ -181,6 +181,8 @@ impl DB {
             return None;
         }
 
+        dbg!(rows.get(0));
+
         Some(rows.into_iter().map(|r| Mover {name: r.get(0), ticker: r.get(1), diff: r.get(4)}).collect::<Vec<Mover>>())
     }
 }
