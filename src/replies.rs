@@ -58,7 +58,7 @@ impl Replies {
     }
 
     fn parse_coin_amount(&self, msg: &str) -> (String, f32) {
-        let coin = "Bitcoin".to_string();
+        let coin = "bitcoin".to_string();
         let amount = 1.0;
         let words: Vec<&str> = msg.split_whitespace().collect();
 
@@ -131,7 +131,7 @@ impl Replies {
     fn get_fiat(&self, coin: String, amount: f32) -> Option<String> {
         let price = self.db.get_latest_price(coin);
         if let Some(p) = price {
-            return Some(format!("{} {} ({}) is worth €{} at €{} per coin", amount, &p.name, p.ticker.to_uppercase(),
+            return Some(format!("{} {} ({}) is worth €{} at €{} per coin", amount, titlecase(&p.name), p.ticker.to_uppercase(),
                                 Replies::format_currency(amount * p.euro), Replies::format_currency(p.euro)))
         }
 
