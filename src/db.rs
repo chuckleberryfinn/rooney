@@ -159,9 +159,13 @@ impl DB {
         })
     }
 
-    pub fn get_movers(&self, sort: String) -> Option<Vec<Mover>> {
+    pub fn get_bulls(&self) -> Option<Vec<Mover>> {
+        self.get_movers("asc")
+    }
+
+    fn get_movers(&self, sort: &str) -> Option<Vec<Mover>> {
         let query =
-            "with movers as (
+            format!("with movers as (
                 select distinct coin_id, first_value(euro) over w as first, last_value(euro) over w as last
                 from prices where time::date=(select max(time)::date from prices) WINDOW w as (
                     partition by coin_id order by time range between unbounded preceding and unbounded
@@ -170,9 +174,9 @@ impl DB {
             select name, ticker, first, last, (last-first)*100/first as diff
             from movers
             join coins using(coin_id)
-            order by diff $1 limit 3;";
+            order by diff {} limit 3;", sort);
 
-        let rows = self.connection.query(query, &[&sort]).unwrap();
+        let rows = self.connection.query(&query, &[]).unwrap();
         if rows.len() < 3 {
             return None;
         }
