@@ -160,6 +160,10 @@ impl DB {
     }
 
     pub fn get_bulls(&self) -> Option<Vec<Mover>> {
+        self.get_movers("desc")
+    }
+
+    pub fn get_bears(&self) -> Option<Vec<Mover>> {
         self.get_movers("asc")
     }
 

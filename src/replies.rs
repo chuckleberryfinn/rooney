@@ -36,6 +36,10 @@ impl Replies {
             return self.get_bulls();
         }
 
+        if msg == "!bears" {
+            return self.get_bears();
+        }
+
         None
     }
 
@@ -80,6 +84,15 @@ impl Replies {
 
     fn get_bulls(&self) -> Option<String> {
         let movers = self.db.get_bulls();
+        if let Some(ms) = movers {
+            return Some(ms.into_iter().map(|m| format!("{}", m)).collect::<Vec<String>>().join(" "));
+        }
+
+        None
+    }
+
+    fn get_bears(&self) -> Option<String> {
+        let movers = self.db.get_bears();
         if let Some(ms) = movers {
             return Some(ms.into_iter().map(|m| format!("{}", m)).collect::<Vec<String>>().join(" "));
         }
