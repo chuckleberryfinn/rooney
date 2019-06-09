@@ -41,7 +41,7 @@ impl Replies {
             return self.get_bears();
         }
 
-        if msg == "!fiat" {
+        if msg.starts_with("!fiat") {
             let (coin, amount) = self.parse_coin_amount(msg);
             return self.get_fiat(coin, amount);
         }
