@@ -1,7 +1,7 @@
 use std::collections::{HashMap, HashSet};
 use std::iter::FromIterator;
 
-use chrono::NaiveDate;
+use chrono::{NaiveDate, NaiveDateTime};
 use postgres::{Connection, TlsMode};
 
 pub struct DB {
@@ -291,7 +291,7 @@ pub struct Diff {
     pub name: String,
     pub ticker: String,
     pub start: NaiveDate,
-    pub end: NaiveDate,
+    pub end: NaiveDateTime,
     pub first: f32,
     pub last: f32,
     pub diff: f32,
