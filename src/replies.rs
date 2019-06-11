@@ -57,7 +57,7 @@ impl Replies {
             return self.get_diff(coin, date);
         }
 
-        None
+        self.db.get_remark(msg)
     }
 
     fn parse_coin_arg(&self, msg: &str) -> String {
