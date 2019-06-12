@@ -1,5 +1,4 @@
 use crate::db;
-use std::fmt;
 use std::str::FromStr;
 
 use chrono::{Duration, NaiveDate, Utc};
@@ -13,7 +12,7 @@ pub struct Replies {
 impl Replies {
     pub fn new() -> Self {
         Self {
-            db: db::DB::new(),
+            db: db::DB::new()
         }
     }
 
@@ -22,12 +21,8 @@ impl Replies {
             return self.get_latest_price(self.get_coin(self.parse_coin_arg(msg)));
         }
 
-        if msg.contains("github") {
-            return Some("https://github.com/nemo-rb/rooney".to_string());
-        }
-
         if msg == "!advice" {
-            return Some(self.db.get_advice());
+            return self.db.get_advice();
         }
 
         if msg.starts_with("!ats") {
@@ -197,53 +192,5 @@ impl Replies {
         let v = (value * 100.0).round() / 100.0;
 
         v.separated_string()
-    }
-
-    fn format_change(diff: f32) -> String {
-        if diff < 0.0 {
-            return format!("\x0305Down: {:.2}%", diff.abs());
-        }
-
-        format!("\x0303Up: {:.2}%", diff)
-    }
-}
-
-impl fmt::Display for db::Price {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Current price for {} ({}): €{} ${} 24h Low: €{} Median: €{} 24h High: €{} {} Today",
-                    titlecase(&self.name), self.ticker.to_uppercase(), Replies::format_currency(self.euro),
-                    Replies::format_currency(self.dollar), Replies::format_currency(self.min), Replies::format_currency(self.median),
-                    Replies::format_currency(self.max), Replies::format_change(self.change))
-    }
-}
-
-impl fmt::Display for db::ATS {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "All time \x0305Low\x03/\x0303High\x03 Prices for {}, Lowest: \x0305€{}\x03 on {} Highest: \x0303€{}\x03 on {}",
-            titlecase(&self.name), Replies::format_currency(self.lowest), self.lowest_date, Replies::format_currency(self.highest), self.highest_date
-        )
-    }
-}
-
-impl fmt::Display for db::Mover {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{} ({}) {} Today\x03", titlecase(&self.name), self.ticker.to_uppercase(), Replies::format_change(self.diff))
-    }
-}
-
-impl fmt::Display for db::Stats {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Stats for {} ({}) on {}: Min €{} Mean €{} Std Dev €{} Median €{} Max €{}",
-                titlecase(&self.name), self.ticker.to_uppercase(), self.date, Replies::format_currency(self.min),
-                Replies::format_currency(self.average), Replies::format_currency(self.std_dev),
-                Replies::format_currency(self.median), Replies::format_currency(self.max))
-    }
-}
-
-impl fmt::Display for db::Diff {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Diff for {} ({}) from {} to {}: First: €{} Latest: €{} Diff: {} To Date",
-                titlecase(&self.name), self.ticker.to_uppercase(), self.start, self.end,
-                Replies::format_currency(self.first), Replies::format_currency(self.last), Replies::format_change(self.diff))
     }
 }
