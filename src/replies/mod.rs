@@ -10,6 +10,7 @@ mod fiat;
 mod formatter;
 mod movers;
 mod price;
+mod remark;
 mod stats;
 
 pub struct Replies {
@@ -59,7 +60,7 @@ impl Replies {
             return diff::get_diff(&self.db, coin, date);
         }
 
-        self.db.get_remark(msg)
+        remark::get_remark(&self.db, msg)
     }
 
     fn parse_coin_arg(&self, msg: &str) -> String {
