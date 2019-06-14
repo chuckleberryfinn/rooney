@@ -3,6 +3,7 @@ use std::str::FromStr;
 
 use chrono::{Duration, NaiveDate, Utc};
 
+mod advice;
 mod ats;
 mod diff;
 mod fiat;
@@ -28,7 +29,7 @@ impl Replies {
         }
 
         if msg == "!advice" {
-            return self.db.get_advice();
+            return advice::get_advice(&self.db);
         }
 
         if msg.starts_with("!ats") {
