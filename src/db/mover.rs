@@ -1,18 +1,9 @@
-use std::fmt;
-
 use postgres::Connection;
-use titlecase::titlecase;
 
 pub struct Mover {
     pub name: String,
     pub ticker: String,
     pub diff: f32
-}
-
-impl fmt::Display for Mover {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{} ({}) {} Today\x03", titlecase(&self.name), self.ticker.to_uppercase(), super::format_change(self.diff))
-    }
 }
 
 pub fn get_bears(connection: &Connection) -> Option<Vec<Mover>> {

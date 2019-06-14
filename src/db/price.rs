@@ -1,6 +1,4 @@
-use std::fmt;
 use postgres::Connection;
-use titlecase::titlecase;
 
 pub struct Price {
     pub name: String,
@@ -11,15 +9,6 @@ pub struct Price {
     pub max: f32,
     pub change: f32,
     pub median: f32
-}
-
-impl fmt::Display for Price {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Current price for {} ({}): €{} ${} 24h Low: €{} Median: €{} 24h High: €{} {} Today",
-                    titlecase(&self.name), self.ticker.to_uppercase(), super::format_currency(self.euro),
-                    super::format_currency(self.dollar), super::format_currency(self.min), super::format_currency(self.median),
-                    super::format_currency(self.max), super::format_change(self.change))
-    }
 }
 
 pub fn query(connection: &Connection, coin: &String) -> Option<Price> {

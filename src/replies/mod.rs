@@ -3,10 +3,34 @@ use std::str::FromStr;
 
 use chrono::{Duration, NaiveDate, Utc};
 use separator::Separatable;
-use titlecase::titlecase;
+
+mod ats;
+mod diff;
+mod fiat;
+mod movers;
+mod price;
+mod stats;
 
 pub struct Replies {
     db: db::DB,
+}
+
+fn format_currency(value: f32) -> String {
+    if value < 1.0 {
+        return format!("{:.8}", value);
+    }
+
+    let v = (value * 100.0).round() / 100.0;
+
+    v.separated_string()
+}
+
+fn format_change(diff: f32) -> String {
+    if diff < 0.0 {
+        return format!("\x0305Down: {:.2}%", diff.abs());
+    }
+
+    format!("\x0303Up: {:.2}%", diff)
 }
 
 impl Replies {
@@ -18,7 +42,7 @@ impl Replies {
 
     pub fn handle_message(&self, msg: &str) -> Option<String> {
         if msg.starts_with("!coin") || msg.starts_with("!crack") {
-            return self.get_latest_price(self.get_coin(self.parse_coin_arg(msg)));
+            return price::get_latest_price(&self.db, self.get_coin(self.parse_coin_arg(msg)));
         }
 
         if msg == "!advice" {
@@ -26,30 +50,30 @@ impl Replies {
         }
 
         if msg.starts_with("!ats") {
-            return self.get_ats(self.get_coin(self.parse_coin_arg(msg)));
+            return ats::get_ats(&self.db, self.get_coin(self.parse_coin_arg(msg)));
         }
 
         if msg == "!bulls" {
-            return self.get_bulls();
+            return movers::get_bulls(&self.db);
         }
 
         if msg == "!bears" {
-            return self.get_bears();
+            return movers::get_bears(&self.db);
         }
 
         if msg.starts_with("!fiat") {
             let (coin, amount) = self.parse_coin_amount(msg);
-            return self.get_fiat(coin, amount);
+            return fiat::get_fiat(&self.db, coin, amount);
         }
 
         if msg.starts_with("!stats") {
             let (coin, date) = self.parse_coin_date(msg);
-            return self.get_stats(coin, date);
+            return stats::get_stats(&self.db, coin, date);
         }
 
         if msg.starts_with("!diff") {
             let (coin, date) = self.parse_coin_date(msg);
-            return self.get_diff(coin, date);
+            return diff::get_diff(&self.db, coin, date);
         }
 
         self.db.get_remark(msg)
@@ -118,79 +142,5 @@ impl Replies {
         };
 
         real_coin.to_string()
-    }
-
-    fn get_latest_price(&self, coin: String) -> Option<String> {
-        let price = self.db.get_latest_price(coin);
-        if let Some(p) = price {
-            return Some(format!("{}", p));
-        }
-
-        None
-    }
-
-    fn get_ats(&self, coin: String) -> Option<String> {
-        let ats = self.db.get_ats(coin);
-        if let Some(a) = ats {
-            return Some(format!("{}", a));
-        }
-
-        None
-    }
-
-    fn get_bulls(&self) -> Option<String> {
-        let movers = self.db.get_bulls();
-        if let Some(ms) = movers {
-            return Some(ms.into_iter().map(|m| format!("{}", m)).collect::<Vec<String>>().join(" "));
-        }
-
-        None
-    }
-
-    fn get_bears(&self) -> Option<String> {
-        let movers = self.db.get_bears();
-        if let Some(ms) = movers {
-            return Some(ms.into_iter().map(|m| format!("{}", m)).collect::<Vec<String>>().join(" "));
-        }
-
-        None
-    }
-
-    fn get_fiat(&self, coin: String, amount: f32) -> Option<String> {
-        let price = self.db.get_latest_price(coin);
-        if let Some(p) = price {
-            return Some(format!("{} {} ({}) is worth €{} at €{} per coin", amount, titlecase(&p.name), p.ticker.to_uppercase(),
-                                Replies::format_currency(amount * p.euro), Replies::format_currency(p.euro)))
-        }
-
-        None
-    }
-
-    fn get_stats(&self, coin: String, date: NaiveDate) -> Option<String> {
-        let stats = self.db.get_stats(coin, date);
-        if let Some(s) = stats {
-            return Some(format!("{}", s));
-        }
-
-        None
-    }
-
-    fn get_diff(&self, coin: String, date: NaiveDate) -> Option<String> {
-        let diff = self.db.get_diff(coin, date);
-        if let Some(d) = diff {
-            return Some(format!("{}", d));
-        }
-
-        None
-    }
-
-    fn format_currency(value: f32) -> String {
-        if value < 1.0 {
-            return format!("{:.8}", value);
-        }
-
-        let v = (value * 100.0).round() / 100.0;
-
-        v.separated_string()
     }
 }
