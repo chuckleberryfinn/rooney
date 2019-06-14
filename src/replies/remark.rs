@@ -29,7 +29,7 @@ pub fn get_remark(db: &db::DB, msg: &str) -> Option<String> {
             match i.unwrap_or(Instant::now()).elapsed() {
                 d if d > Duration::new(60*COOLDOWN, 0) => {
                     set_last_call();
-                    db.get_advice()
+                    db.get_remark(msg)
                 },
                 _ => None
             }
