@@ -1,14 +1,15 @@
 use std::fmt;
 use titlecase::titlecase;
 
-use super::NaiveDate;
 use super::db;
+use super::NaiveDate;
+use super::formatter::{format_change, format_currency};
 
 impl fmt::Display for db::diff::Diff {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "Diff for {} ({}) from {} to {}: First: €{} Latest: €{} Diff: {} To Date",
                 titlecase(&self.name), self.ticker.to_uppercase(), self.start, self.end,
-                super::format_currency(self.first), super::format_currency(self.last), super::format_change(self.diff))
+                format_currency(self.first), format_currency(self.last), format_change(self.diff))
     }
 }
 

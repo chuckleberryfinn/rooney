@@ -2,10 +2,11 @@ use std::fmt;
 use titlecase::titlecase;
 
 use super::db;
+use super::formatter::format_change;
 
 impl fmt::Display for db::mover::Mover {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{} ({}) {} Today\x03", titlecase(&self.name), self.ticker.to_uppercase(), super::format_change(self.diff))
+        write!(f, "{} ({}) {} Today\x03", titlecase(&self.name), self.ticker.to_uppercase(), format_change(self.diff))
     }
 }
 
