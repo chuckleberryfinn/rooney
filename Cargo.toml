@@ -1,6 +1,6 @@
 [package]
 name = "rooney"
-version = "1.0.0"
+version = "1.0.1"
 authors = ["nemo <nemo@redbrick.dcu.ie>"]
 edition = "2018"
 
