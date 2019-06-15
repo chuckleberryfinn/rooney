@@ -11,4 +11,5 @@ log = "0.4.6"
 postgres = {version = "0.15.2", features = ["with-chrono"]}
 separator = "0.3.1"
 std-logger = "0.3.3"
+toml = "0.5.1"
 titlecase = "0.9"

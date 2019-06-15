@@ -8,7 +8,7 @@ mod replies;
 use irc::client::prelude::*;
 
 pub fn run() {
-    let config = Config::load("configuration/config.toml").unwrap();
+    let config = Config::load("configuration/Config.toml").unwrap();
     let mut reactor = IrcReactor::new().unwrap();
     let client = reactor.prepare_client_and_connect(&config).unwrap();
     let replies = replies::Replies::new();

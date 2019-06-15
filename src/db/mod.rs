@@ -1,8 +1,10 @@
 use std::collections::{HashMap, HashSet};
+use std::fs;
 use std::iter::FromIterator;
 
 use chrono::{NaiveDate};
 use postgres::{Connection, TlsMode};
+use toml::Value;
 
 use ats::ATS;
 use mover::Mover;
@@ -19,6 +21,12 @@ pub mod price;
 pub mod remarks;
 pub mod stats;
 
+fn read_config(path: &str) -> Value {
+    let toml_content = fs::read_to_string(path)
+                        .expect(&format!("Unable to read DB config from: {}", path));
+    toml::from_str(&toml_content).expect(&format!("Unable to parse TOML from {}", path))
+}
+
 pub struct DB {
     connection: Connection,
     pub all_coins: HashSet<String>,
@@ -27,8 +35,9 @@ pub struct DB {
 
 impl DB {
     pub fn new() -> Self {
-        let config = "postgresql://nemo@%2Fvar%2Frun%2Fpostgresql";
-        let c = Connection::connect(config, TlsMode::None).expect("Error connection to database");
+        let config = read_config("configuration/DB.toml");
+        let c = Connection::connect(config["database"]["connection"].as_str().unwrap(), TlsMode::None)
+                                    .expect("Error connecting to database");
         let nicks_coins = DB::get_nicks(&c);
         let all_coins = DB::get_coins(&nicks_coins);
 
