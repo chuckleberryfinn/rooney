@@ -6,6 +6,7 @@ use chrono::{Duration, NaiveDate, Utc};
 mod advice;
 mod ats;
 mod diff;
+mod help;
 mod fiat;
 mod formatter;
 mod movers;
@@ -60,6 +61,13 @@ impl Replies {
             return diff::get_diff(&self.db, coin, date);
         }
 
+        if msg.starts_with("!help") {
+            match self.parse_help(msg) {
+                None => return Some(self.help()),
+                Some(c) => return help::get_help(&c)
+            }
+        }
+
         remark::get_remark(&self.db, msg)
     }
 
@@ -67,7 +75,15 @@ impl Replies {
         let words: Vec<&str> = msg.split_whitespace().collect();
         match words.len() {
             1 => "bitcoin".to_string(),
-             _ => words[1].to_string().to_lowercase(),
+            _ => words[1].to_string().to_lowercase(),
+        }
+    }
+
+    fn parse_help(&self, msg: &str) -> Option<String> {
+        let words: Vec<&str> = msg.split_whitespace().collect();
+        match words.len() {
+            1 => None,
+            _ => Some(words[1].to_string().to_lowercase()),
         }
     }
 
@@ -126,5 +142,10 @@ impl Replies {
         };
 
         real_coin.to_string()
+    }
+
+    fn help(&self) -> String {
+        "Commands: !advice !ats !bears !bulls !help !coin !diff !fiat !stats. \
+            !help [command] for more information on a specific command.".to_string()
     }
 }

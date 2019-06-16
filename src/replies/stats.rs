@@ -22,3 +22,8 @@ pub fn get_stats(db: &db::DB, coin: String, date: NaiveDate) -> Option<String> {
 
     None
 }
+
+pub fn help() -> String {
+    "!stats [coin|ticker] [date]: Get the statistics for a coin's price over the course of a day. \
+        Defaults to btc and yesterday's date.".to_string()
+}

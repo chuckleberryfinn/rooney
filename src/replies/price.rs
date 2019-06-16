@@ -21,3 +21,7 @@ pub fn get_latest_price(db: &db::DB, coin: String) -> Option<String> {
 
     None
 }
+
+pub fn help() -> String {
+    "!coin [coin|ticker]: Get current price for a coin. Defaults to btc.".to_string()
+}

@@ -19,6 +19,10 @@ pub fn get_bears(db: &db::DB) -> Option<String> {
     None
 }
 
+pub fn bears_help() -> String {
+    "!bears: Get today's big losers.".to_string()
+}
+
 pub fn get_bulls(db: &db::DB) -> Option<String> {
     let movers = db.get_bulls();
     if let Some(ms) = movers {
@@ -26,4 +30,8 @@ pub fn get_bulls(db: &db::DB) -> Option<String> {
     }
 
     None
+}
+
+pub fn bulls_help() -> String {
+    "!bulls: Get today's big winners.".to_string()
 }
