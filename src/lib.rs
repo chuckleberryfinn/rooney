@@ -2,8 +2,6 @@
 extern crate log;
 extern crate env_logger;
 
-use log::Level;
-
 mod db;
 mod replies;
 
