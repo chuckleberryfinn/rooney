@@ -1,6 +1,8 @@
 #[macro_use]
 extern crate log;
-extern crate std_logger;
+extern crate env_logger;
+
+use log::Level;
 
 mod db;
 mod replies;
@@ -12,7 +14,6 @@ pub fn run() {
     let mut reactor = IrcReactor::new().unwrap();
     let client = reactor.prepare_client_and_connect(&config).unwrap();
     let replies = replies::Replies::new();
-    std_logger::init();
 
     client.identify().unwrap();
 
