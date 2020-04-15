@@ -14,7 +14,7 @@ pub fn query(connection: &Connection, msg: &str) -> Option<String> {
 
     let rows = connection.query(&query, &[&msg]).unwrap();
 
-    if rows.len() == 0 {
+    if rows.is_empty() {
         return None;
     }
 

@@ -13,7 +13,7 @@ impl fmt::Display for db::ats::ATS {
 }
 
 pub fn help() -> String {
-    return "!ats [coin]: All time highs and lows for a coin. Defaults to bitcoin.".to_string()
+    "!ats [coin]: All time highs and lows for a coin. Defaults to bitcoin.".to_string()
 }
 
 pub fn get_ats(db: &db::DB, coin: String) -> Option<String> {

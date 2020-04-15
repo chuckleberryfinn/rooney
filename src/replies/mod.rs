@@ -100,7 +100,7 @@ impl Replies {
             };
         }
 
-        return (coin, amount);
+        (coin, amount)
     }
 
     fn parse_coin_date(&self, msg: &str) -> (String, NaiveDate) {
@@ -122,7 +122,7 @@ impl Replies {
             };
         }
 
-        return (coin, date);
+        (coin, date)
     }
 
     fn get_coin(&self, coin: String) -> String {

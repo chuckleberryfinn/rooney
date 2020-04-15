@@ -11,7 +11,7 @@ pub struct Price {
     pub median: f32
 }
 
-pub fn query(connection: &Connection, coin: &String) -> Option<Price> {
+pub fn query(connection: &Connection, coin: &str) -> Option<Price> {
     let query =
         "with daily_prices as (
             select * from prices
@@ -53,7 +53,7 @@ pub fn query(connection: &Connection, coin: &String) -> Option<Price> {
         join median_prices using(name)";
 
     let rows = connection.query(query, &[&coin]).unwrap();
-    if rows.len() == 0 {
+    if rows.is_empty() {
         return None;
     }
 

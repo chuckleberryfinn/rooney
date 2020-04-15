@@ -1,4 +1,4 @@
-pub fn get_help(command: &String) -> Option<String> {
+pub fn get_help(command: &str) -> Option<String> {
     match &command[..] {
         "advice" => Some(super::advice::help()),
         "ats" => Some(super::ats::help()),

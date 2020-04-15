@@ -23,8 +23,8 @@ pub mod stats;
 
 fn read_config(path: &str) -> Value {
     let toml_content = fs::read_to_string(path)
-                        .expect(&format!("Unable to read DB config from: {}", path));
-    toml::from_str(&toml_content).expect(&format!("Unable to parse TOML from {}", path))
+                        .unwrap_or_else(|_| panic!("Unable to read DB config from: {}", path));
+    toml::from_str(&toml_content).unwrap_or_else(|_| panic!("Unable to parse TOML from {}", path))
 }
 
 pub struct DB {
@@ -42,8 +42,8 @@ impl DB {
         let all_coins = DB::get_coins(&nicks_coins);
 
         Self {
-            all_coins: all_coins,
-            nicks_coins: nicks_coins,
+            all_coins,
+            nicks_coins,
             connection: c,
         }
     }

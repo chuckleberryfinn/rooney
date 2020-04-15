@@ -21,7 +21,7 @@ pub fn query(connection: &Connection, coin: String, date: NaiveDate) -> Option<S
             and date = $2";
     let rows = connection.query(&query, &[&coin, &date]).unwrap();
 
-    if rows.len() == 0 {
+    if rows.is_empty() {
         return None;
     }
 
