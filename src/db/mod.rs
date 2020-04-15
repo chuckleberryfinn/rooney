@@ -42,8 +42,8 @@ impl DB {
         let all_coins = DB::get_coins(&nicks_coins);
 
         Self {
-            all_coins: all_coins,
-            nicks_coins: nicks_coins,
+            all_coins,
+            nicks_coins,
             connection: c,
         }
     }
