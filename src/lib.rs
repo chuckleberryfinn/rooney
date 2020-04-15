@@ -17,9 +17,8 @@ pub fn run() {
 
     reactor.register_client_with_handler(client, move |client, message| {
         if let Command::PRIVMSG(ref target, ref msg) = message.command {
-            match replies.handle_message(&msg) {
-                Some(response) => client.send_privmsg(message.response_target().unwrap(), response)?,
-                None => (),
+            if let Some(response) = replies.handle_message(&msg) {
+                client.send_privmsg(message.response_target().unwrap(), response)?
             }
             info!("{} said {} to {}", message.source_nickname().unwrap(), msg, target);
         }
