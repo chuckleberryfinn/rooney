@@ -10,7 +10,7 @@ thread_local! {
 }
 
 fn get_last_call() -> Option<Instant> {
-    LAST_CALL.with(|last_call| last_call.borrow().clone())
+    LAST_CALL.with(|last_call| *last_call.borrow())
 }
 
 fn set_last_call() {
@@ -30,7 +30,7 @@ pub fn get_advice(db: &db::DB) -> Option<String> {
             db.get_advice()
         },
         i => {
-            match i.unwrap_or(Instant::now()).elapsed() {
+            match i.unwrap_or_else(Instant::now).elapsed() {
                 d if d > Duration::new(60*COOLDOWN, 0) => {
                     set_last_call();
                     db.get_advice()

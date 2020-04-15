@@ -11,7 +11,7 @@ pub struct Price {
     pub median: f32
 }
 
-pub fn query(connection: &Connection, coin: &String) -> Option<Price> {
+pub fn query(connection: &Connection, coin: &str) -> Option<Price> {
     let query =
         "with daily_prices as (
             select * from prices
