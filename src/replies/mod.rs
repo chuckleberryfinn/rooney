@@ -26,49 +26,43 @@ impl Replies {
     }
 
     pub fn handle_message(&self, msg: &str) -> Option<String> {
-        if msg.starts_with("!coin") || msg.starts_with("!crack") {
-            return price::get_latest_price(&self.db, self.get_coin(self.parse_coin_arg(msg)));
-        }
+        let commands: Vec<&str> = msg.split_whitespace().collect();
+        let command = commands[0];
 
-        if msg == "!advice" {
-            return advice::get_advice(&self.db);
+        return match command {
+            "!coin" | "!crack" => price::get_latest_price(
+                &self.db, self.get_coin(
+                    self.parse_coin_arg(msg)
+                )
+            ),
+            "!advice" => return advice::get_advice(&self.db),
+            "!ats" => return ats::get_ats(
+                &self.db, self.get_coin(
+                    self.parse_coin_arg(msg)
+                )
+            ),
+            "!bulls" => return movers::get_bulls(&self.db),
+            "!bears" => return movers::get_bears(&self.db),
+            "!fiat" => {
+                let (coin, amount) = self.parse_coin_amount(msg);
+                return fiat::get_fiat(&self.db, coin, amount)
+            },
+            "!stats" => {
+                let (coin, date) = self.parse_coin_date(msg);
+                return stats::get_stats(&self.db, coin, date)
+            },
+            "!diff" => {
+                let (coin, date) = self.parse_coin_date(msg);
+                return diff::get_diff(&self.db, coin, date)
+            },
+            "!help" => {
+                match self.parse_help(msg) {
+                    None => return Some(self.help()),
+                    Some(c) => return help::get_help(&c)
+                }
+            },
+            _ => remark::get_remark(&self.db, msg)
         }
-
-        if msg.starts_with("!ats") {
-            return ats::get_ats(&self.db, self.get_coin(self.parse_coin_arg(msg)));
-        }
-
-        if msg == "!bulls" {
-            return movers::get_bulls(&self.db);
-        }
-
-        if msg == "!bears" {
-            return movers::get_bears(&self.db);
-        }
-
-        if msg.starts_with("!fiat") {
-            let (coin, amount) = self.parse_coin_amount(msg);
-            return fiat::get_fiat(&self.db, coin, amount);
-        }
-
-        if msg.starts_with("!stats") {
-            let (coin, date) = self.parse_coin_date(msg);
-            return stats::get_stats(&self.db, coin, date);
-        }
-
-        if msg.starts_with("!diff") {
-            let (coin, date) = self.parse_coin_date(msg);
-            return diff::get_diff(&self.db, coin, date);
-        }
-
-        if msg.starts_with("!help") {
-            match self.parse_help(msg) {
-                None => return Some(self.help()),
-                Some(c) => return help::get_help(&c)
-            }
-        }
-
-        remark::get_remark(&self.db, msg)
     }
 
     fn parse_coin_arg(&self, msg: &str) -> String {
