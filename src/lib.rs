@@ -13,7 +13,7 @@ pub fn run() {
     let args: Vec<String> = env::args().collect();
 
 
-    let config = if args.is_empty() {
+    let config = if args.len() == 1 {
         Config::load("configuration/DebugConfig.toml").unwrap()
     } else {
         match args[1].as_str() {
