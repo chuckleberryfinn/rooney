@@ -1,4 +1,5 @@
 use super::db;
+use std::cmp::Ordering;
 use std::str::FromStr;
 
 use chrono::{Duration, NaiveDate, Utc};
@@ -81,44 +82,26 @@ impl Replies {
 
     fn parse_coin_amount(&self, words: &[&str]) -> (String, f32) {
         let coin = self.get_coin(self.parse_coin_arg(words));
-        let amount = 1.0;
 
-        if words.len() == 2 {
-            return match f32::from_str(words[1]) {
-                Ok(f) => (coin, f),
-                Err(_e) => (coin, amount),
-            };
-        }
+        let amount = match words.len().cmp(&2) {
+            Ordering::Equal => words[1],
+            Ordering::Greater => words[2],
+            Ordering::Less => "1.0"
+        };
 
-        if words.len() > 2 {
-            return match f32::from_str(words[2]) {
-                Ok(f) => (coin, f),
-                Err(_e) => (coin, amount),
-            };
-        }
-
-        (coin, amount)
+        (coin, f32::from_str(amount).unwrap_or(1.0))
     }
 
     fn parse_coin_date(&self, words: &[&str]) -> (String, NaiveDate) {
         let coin = self.get_coin(self.parse_coin_arg(words));
-        let date = Utc::today().naive_local() - Duration::days(1);
 
-        if words.len() == 2 {
-            return match NaiveDate::from_str(words[1]) {
-                Ok(f) => (coin, f),
-                Err(_e) => (coin, date),
-            };
-        }
+        let date = match words.len().cmp(&2) {
+            Ordering::Equal => words[1],
+            Ordering::Greater => words[2],
+            Ordering::Less => "Yesterday"
+        };
 
-        if words.len() > 2 {
-            return match NaiveDate::from_str(words[2]) {
-                Ok(f) => (coin, f),
-                Err(_e) => (coin, date),
-            };
-        }
-
-        (coin, date)
+        (coin, NaiveDate::from_str(date).unwrap_or(Utc::today().naive_local() - Duration::days(1)))
     }
 
     fn get_coin(&self, coin: String) -> String {
