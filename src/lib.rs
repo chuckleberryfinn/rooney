@@ -5,10 +5,23 @@ extern crate env_logger;
 mod db;
 mod replies;
 
+use std::env;
+
 use irc::client::prelude::*;
 
 pub fn run() {
-    let config = Config::load("configuration/Config.toml").unwrap();
+    let args: Vec<String> = env::args().collect();
+
+
+    let config = if args.is_empty() {
+        Config::load("configuration/DebugConfig.toml").unwrap()
+    } else {
+        match args[0].as_str() {
+            "-release" => Config::load("configuration/Config.toml").unwrap(),
+            _ => Config::load("configuration/DebugConfig.toml").unwrap()
+        }
+    };
+
     let mut reactor = IrcReactor::new().unwrap();
     let client = reactor.prepare_client_and_connect(&config).unwrap();
     let replies = replies::Replies::new();
