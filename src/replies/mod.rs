@@ -32,31 +32,31 @@ impl Replies {
         match command {
             "!coin" | "!crack" => price::get_latest_price(
                 &self.db, self.get_coin(
-                    self.parse_coin_arg(msg)
+                    self.parse_coin_arg(&commands)
                 )
             ),
             "!advice" => advice::get_advice(&self.db),
             "!ats" => ats::get_ats(
                 &self.db, self.get_coin(
-                    self.parse_coin_arg(msg)
+                    self.parse_coin_arg(&commands)
                 )
             ),
             "!bulls" => movers::get_bulls(&self.db),
             "!bears" => movers::get_bears(&self.db),
             "!fiat" => {
-                let (coin, amount) = self.parse_coin_amount(msg);
+                let (coin, amount) = self.parse_coin_amount(&commands);
                 fiat::get_fiat(&self.db, coin, amount)
             },
             "!stats" => {
-                let (coin, date) = self.parse_coin_date(msg);
+                let (coin, date) = self.parse_coin_date(&commands);
                 stats::get_stats(&self.db, coin, date)
             },
             "!diff" => {
-                let (coin, date) = self.parse_coin_date(msg);
+                let (coin, date) = self.parse_coin_date(&commands);
                 diff::get_diff(&self.db, coin, date)
             },
             "!help" => {
-                match self.parse_help(msg) {
+                match self.parse_help(&commands) {
                     None => Some(self.help()),
                     Some(c) => help::get_help(&c)
                 }
@@ -65,26 +65,23 @@ impl Replies {
         }
     }
 
-    fn parse_coin_arg(&self, msg: &str) -> String {
-        let words: Vec<&str> = msg.split_whitespace().collect();
+    fn parse_coin_arg(&self, words: &[&str]) -> String {
         match words.len() {
             1 => "bitcoin".to_string(),
             _ => words[1].to_string().to_lowercase(),
         }
     }
 
-    fn parse_help(&self, msg: &str) -> Option<String> {
-        let words: Vec<&str> = msg.split_whitespace().collect();
+    fn parse_help(&self, words: &[&str]) -> Option<String> {
         match words.len() {
             1 => None,
             _ => Some(words[1].to_string().to_lowercase()),
         }
     }
 
-    fn parse_coin_amount(&self, msg: &str) -> (String, f32) {
-        let coin = self.get_coin(self.parse_coin_arg(msg));
+    fn parse_coin_amount(&self, words: &[&str]) -> (String, f32) {
+        let coin = self.get_coin(self.parse_coin_arg(words));
         let amount = 1.0;
-        let words: Vec<&str> = msg.split_whitespace().collect();
 
         if words.len() == 2 {
             return match f32::from_str(words[1]) {
@@ -103,10 +100,9 @@ impl Replies {
         (coin, amount)
     }
 
-    fn parse_coin_date(&self, msg: &str) -> (String, NaiveDate) {
-        let coin = self.get_coin(self.parse_coin_arg(msg));
+    fn parse_coin_date(&self, words: &[&str]) -> (String, NaiveDate) {
+        let coin = self.get_coin(self.parse_coin_arg(words));
         let date = Utc::today().naive_local() - Duration::days(1);
-        let words: Vec<&str> = msg.split_whitespace().collect();
 
         if words.len() == 2 {
             return match NaiveDate::from_str(words[1]) {
