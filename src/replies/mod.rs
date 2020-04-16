@@ -109,12 +109,10 @@ impl Replies {
             return coin;
         }
 
-        let real_coin = match self.db.nicks_coins.get(&coin) {
+        match self.db.nicks_coins.get(&coin) {
             Some(c) => c,
             None => "bitcoin"
-        };
-
-        real_coin.to_string()
+        }.to_string()
     }
 
     fn help(&self) -> String {
