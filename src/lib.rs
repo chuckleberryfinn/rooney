@@ -16,8 +16,8 @@ pub fn run() {
     let config = if args.is_empty() {
         Config::load("configuration/DebugConfig.toml").unwrap()
     } else {
-        match args[0].as_str() {
-            "-release" => Config::load("configuration/Config.toml").unwrap(),
+        match args[1].as_str() {
+            "release" => Config::load("configuration/Config.toml").unwrap(),
             _ => Config::load("configuration/DebugConfig.toml").unwrap()
         }
     };
