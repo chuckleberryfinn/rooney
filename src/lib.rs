@@ -24,7 +24,7 @@ pub fn run() {
 
     let mut reactor = IrcReactor::new().unwrap();
     let client = reactor.prepare_client_and_connect(&config).unwrap();
-    let replies = replies::Replies::new();
+    let mut replies = replies::Replies::new();
 
     client.identify().unwrap();
 
