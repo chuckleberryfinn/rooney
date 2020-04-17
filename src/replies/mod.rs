@@ -1,6 +1,7 @@
 use super::db;
 use std::cmp::Ordering;
 use std::str::FromStr;
+use std::time;
 
 use chrono::{Duration, NaiveDate, Utc};
 
@@ -15,18 +16,40 @@ mod price;
 mod remark;
 mod stats;
 
+const COOLDOWN: u64 = 3;
+
 pub struct Replies {
     db: db::DB,
+    last_call: Option<time::Instant>
 }
 
 impl Replies {
     pub fn new() -> Self {
         Self {
-            db: db::DB::new()
+            db: db::DB::new(),
+            last_call: None
         }
     }
 
-    pub fn handle_message(&self, msg: &str) -> Option<String> {
+    fn on_cooldown(&mut self) -> bool {
+        match self.last_call {
+            Some(l) => {
+                match l.elapsed() {
+                    d if d > time::Duration::new(60*COOLDOWN, 0) => {
+                        self.last_call = Some(time::Instant::now());
+                        false
+                    },
+                    _ => true
+                }
+            },
+            None => {
+                self.last_call = Some(time::Instant::now());
+                false
+            }
+        }
+    }
+
+    pub fn handle_message(&mut self, msg: &str) -> Option<String> {
         let commands: Vec<&str> = msg.split_whitespace().collect();
         let command = commands[0];
 
@@ -36,7 +59,13 @@ impl Replies {
                     self.parse_coin_arg(&commands)
                 )
             ),
-            "!advice" => advice::get_advice(&self.db),
+            "!advice" => {
+                if !self.on_cooldown() {
+                    advice::get_advice(&self.db)
+                } else {
+                    None
+                }
+            },
             "!ats" => ats::get_ats(
                 &self.db, self.get_coin(
                     self.parse_coin_arg(&commands)
