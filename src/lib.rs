@@ -24,13 +24,13 @@ pub fn run() {
 
     let mut reactor = IrcReactor::new().unwrap();
     let client = reactor.prepare_client_and_connect(&config).unwrap();
-    let mut replies = replies::Replies::new();
+    let commands = replies::Commands::new();
 
     client.identify().unwrap();
 
     reactor.register_client_with_handler(client, move |client, message| {
         if let Command::PRIVMSG(ref target, ref msg) = message.command {
-            if let Some(response) = replies.handle_message(&msg) {
+            if let Ok(response) = commands.handle(&msg) {
                 client.send_privmsg(message.response_target().unwrap(), response)?
             }
             info!("{} said {} to {}", message.source_nickname().unwrap(), msg, target);
