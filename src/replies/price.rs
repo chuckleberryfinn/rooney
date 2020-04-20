@@ -35,16 +35,3 @@ impl fmt::Display for db::price::Price {
                     format_currency(self.max), format_change(self.change))
     }
 }
-
-pub fn get_latest_price(db: &db::DB, coin: String) -> Option<String> {
-    let price = db.get_latest_price(coin);
-    if let Some(p) = price {
-        return Some(format!("{}", p));
-    }
-
-    None
-}
-
-pub fn help() -> String {
-    "!coin [coin|ticker]: Get current price for a coin. Defaults to btc.".to_string()
-}

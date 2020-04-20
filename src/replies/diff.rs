@@ -37,17 +37,3 @@ impl fmt::Display for db::diff::Diff {
                 format_currency(self.first), format_currency(self.last), format_change(self.diff))
     }
 }
-
-pub fn help() -> String {
-    "!diff [coin|ticker] [date]: Get the difference in price between the start date and current price. \
-        Defaults to btc and yesterday's date".to_string()
-}
-
-pub fn get_diff(db: &db::DB, coin: String, date: NaiveDate) -> Option<String> {
-    let diff = db.get_diff(coin, date);
-    if let Some(d) = diff {
-        return Some(format!("{}", d));
-    }
-
-    None
-}

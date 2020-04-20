@@ -34,16 +34,3 @@ impl fmt::Display for db::ats::ATS {
         )
     }
 }
-
-pub fn get_ats(db: &db::DB, coin: String) -> Option<String> {
-    let ats = db.get_ats(coin);
-    if let Some(a) = ats {
-        return Some(format!("{}", a));
-    }
-
-    None
-}
-
-pub fn help() -> String {
-    "!ats [coin]: All time highs and lows for a coin. Defaults to bitcoin.".to_string()
-}
