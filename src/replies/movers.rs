@@ -12,7 +12,7 @@ impl Command for Bulls {
     }
 
     fn run(&self, db: &db::DB, msg: &Option<&str>) -> Result<String> {
-        let commands: Vec<&str> = msg.unwrap().split_whitespace().collect();
+        let commands: Vec<&str> = msg.unwrap_or("").split_whitespace().collect();
         let movers = db.get_bulls();
 
         match movers {
@@ -34,7 +34,7 @@ impl Command for Bears {
     }
 
     fn run(&self, db: &db::DB, msg: &Option<&str>) -> Result<String> {
-        let commands: Vec<&str> = msg.unwrap().split_whitespace().collect();
+        let commands: Vec<&str> = msg.unwrap_or("").split_whitespace().collect();
         let movers = db.get_bears();
 
         match movers {
