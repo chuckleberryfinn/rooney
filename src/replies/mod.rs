@@ -95,7 +95,7 @@ trait Command {
 
     fn parse_coin_arg(&self, words: &[&str]) -> String {
         match words.len() {
-            1 => "bitcoin".to_string(),
+            0 => "bitcoin".to_string(),
             _ => words[1].to_string().to_lowercase(),
         }
     }
