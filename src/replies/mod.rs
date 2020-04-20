@@ -62,7 +62,7 @@ impl Commands {
         }
 
         match self.find_command(&command) {
-            Some(c) => c.run(&self.db, &message),
+            Some(c) => c.run(&self.db, &rest),
             None => Ok(remark::get_remark(&self.db, &message).unwrap())
         }
     }
