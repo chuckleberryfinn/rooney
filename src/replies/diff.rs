@@ -2,7 +2,6 @@ use std::fmt;
 use titlecase::titlecase;
 
 use super::{db, Command, Error, Result};
-use super::NaiveDate;
 use super::formatter::{format_change, format_currency};
 
 pub(super) struct Diff;

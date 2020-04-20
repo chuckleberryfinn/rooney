@@ -19,12 +19,6 @@ mod stats;
 const COOLDOWN: u64 = 3;
 
 
-pub struct Replies {
-    db: db::DB,
-    last_call: Option<time::Instant>
-}
-
-
 pub struct Commands {
     commands: Vec<Box<dyn Command>>,
     db: db::DB,

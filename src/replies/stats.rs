@@ -2,7 +2,6 @@ use std::fmt;
 use titlecase::titlecase;
 
 use super::{db, formatter::format_currency, Command, Error, Result};
-use super::NaiveDate;
 
 pub(super) struct Stats;
 
