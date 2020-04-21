@@ -44,11 +44,11 @@ impl Commands {
 
         if command == "!help" {
             return match rest {
-                None => self.general_help(),
+                None => self.help(),
                 Some(r) => {
                     let mut split = r.splitn(2, ' ');
                     match self.find_command(&split.next().unwrap()) {
-                        None => self.general_help(),
+                        None => self.help(),
                         Some(c) => Ok(c.help().to_string()),
                     }
                 }
@@ -65,7 +65,7 @@ impl Commands {
         self.commands.iter().find(|c| c.name() == command)
     }
 
-    fn general_help(&self) -> Result<String> {
+    fn help(&self) -> Result<String> {
         Ok("Commands: !advice !ats !bears !bulls !help !coin !diff !fiat !stats. \
             !help [command] for more information on a specific command.".to_string())
     }
