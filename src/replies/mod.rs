@@ -69,8 +69,6 @@ impl Commands {
 
 #[derive(Debug, Fail, PartialEq)]
 pub enum Error {
-    #[fail(display = "Unknown command")]
-    Unknown,
     #[fail(display = "Cannot contact database")]
     Contact,
 }
@@ -96,9 +94,9 @@ trait Command {
 trait CommandArgs {
     fn parse_coin_arg(&self, words: &[&str]) -> String {
         match words.len() {
-            1 => "bitcoin".to_string(),
-            _ => words[1].to_string().to_lowercase(),
-        }
+            1 => "bitcoin",
+            _ => words[1],
+        }.to_string().to_lowercase()
     }
     
     fn get_coin(&self, db: &db::DB, coin: String) -> String {
