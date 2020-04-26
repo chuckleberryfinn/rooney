@@ -10,7 +10,7 @@ impl Command for Fiat {
     }
 
     fn run(&self, db: &db::DB, msg: &Option<&str>) -> Result<String> {
-        let commands: Vec<&str> = msg.unwrap_or("").split_whitespace().collect();
+        let commands: Vec<&str> = msg.unwrap().split_whitespace().collect();
         let coin = self.get_coin(&db, self.parse_coin_arg(&commands));
         let amount = self.parse_amount(&commands);
         let price = db.get_latest_price(coin);
