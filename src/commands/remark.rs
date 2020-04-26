@@ -57,7 +57,7 @@ impl Command for Remark {
                     self.set_last_call();
                     Ok(r)
                 },
-                None => Err(Error::Cooldown)
+                None => Err(Error::Reply)
             }
         }
     }
