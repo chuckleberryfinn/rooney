@@ -32,17 +32,11 @@ impl Cooldown for Remark {
     fn on_cooldown(&self) -> bool {
         match self.get_last_call() {
             None => {
-                self.set_last_call();
                 false
             },
             last_call => {
                 let elapsed = last_call.unwrap_or_else(Instant::now).elapsed();
-                if elapsed > Duration::new(60*COOLDOWN, 0) {
-                    self.set_last_call();
-                    false
-                } else {
-                    true
-                }
+                elapsed <= Duration::new(60*COOLDOWN, 0)
             }
         }
     }
@@ -56,11 +50,14 @@ impl Command for Remark {
 
     fn run(&self, db: &db::DB, msg: &Option<&str>) -> Result<String> {
         if self.on_cooldown() {
-            Err(Error::Contact)
+            Err(Error::Cooldown)
         } else {
             match db.get_remark(msg.unwrap()) {
-                Some(r) => Ok(r),
-                None => Err(Error::Contact)
+                Some(r) => {
+                    self.set_last_call();
+                    Ok(r)
+                },
+                None => Err(Error::Cooldown)
             }
         }
     }

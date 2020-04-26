@@ -56,7 +56,7 @@ impl Command for Advice {
 
     fn run(&self, db: &db::DB, _: &Option<&str>) -> Result<String> {
         if self.on_cooldown() {
-            Err(Error::Contact)
+            Err(Error::Cooldown)
         } else {
             Ok(db.get_advice().unwrap())
         }

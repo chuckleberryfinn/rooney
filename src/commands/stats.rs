@@ -11,7 +11,7 @@ impl Command for Stats {
     }
 
     fn run(&self, db: &db::DB, msg: &Option<&str>) -> Result<String> {
-        let commands: Vec<&str> = msg.unwrap_or("").split_whitespace().collect();
+        let commands: Vec<&str> = msg.unwrap().split_whitespace().collect();
         let coin = self.get_coin(&db, self.parse_coin_arg(&commands));
         let date = self.parse_date(&commands);
         let stats = db.get_stats(coin, date);
