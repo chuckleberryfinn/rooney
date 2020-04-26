@@ -1,7 +1,7 @@
 use std::fmt;
 use titlecase::titlecase;
 
-use super::{db, Command, Error, Result};
+use super::{db, Command, CommandArgs, Error, Result};
 use super::formatter::format_currency;
 
 pub(super) struct ATS;
@@ -26,6 +26,8 @@ impl Command for ATS {
         "!ats [coin]: All time highs and lows for a coin. Defaults to bitcoin."
     }
 }
+
+impl CommandArgs for ATS {}
 
 impl fmt::Display for db::ats::ATS {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {

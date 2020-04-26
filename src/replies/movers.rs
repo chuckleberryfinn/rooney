@@ -1,7 +1,7 @@
 use std::fmt;
 use titlecase::titlecase;
 
-use super::{db, Command, Error, Result};
+use super::{db, Command, CommandArgs, Error, Result};
 use super::formatter::format_change;
 
 pub(super) struct Bulls;
@@ -25,6 +25,8 @@ impl Command for Bulls {
     }
 }
 
+impl CommandArgs for Bulls {}
+
 pub(super) struct Bears;
 
 impl Command for Bears {
@@ -45,6 +47,8 @@ impl Command for Bears {
         "!bears: Get today's big losers."
     }
 }
+
+impl CommandArgs for Bears {}
 
 impl fmt::Display for db::mover::Mover {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {

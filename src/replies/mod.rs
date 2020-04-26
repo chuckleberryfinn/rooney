@@ -90,7 +90,10 @@ trait Command {
     fn name(&self) -> &'static str;
     fn run(&self, db: &db::DB, args: &Option<&str>) -> Result<String>;
     fn help(&self) -> &'static str;
+}
 
+
+trait CommandArgs {
     fn parse_coin_arg(&self, words: &[&str]) -> String {
         match words.len() {
             1 => "bitcoin".to_string(),

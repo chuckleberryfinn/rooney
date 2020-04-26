@@ -1,6 +1,6 @@
 use titlecase::titlecase;
 
-use super::{db, formatter::format_currency, Command, Error, Result};
+use super::{db, formatter::format_currency, Command, CommandArgs, Error, Result};
 
 pub(super) struct Fiat;
 
@@ -27,3 +27,5 @@ impl Command for Fiat {
             Defaults to btc and 1 coin."
     }
 }
+
+impl CommandArgs for Fiat {}

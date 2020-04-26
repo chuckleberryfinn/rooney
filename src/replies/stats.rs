@@ -1,7 +1,7 @@
 use std::fmt;
 use titlecase::titlecase;
 
-use super::{db, formatter::format_currency, Command, Error, Result};
+use super::{db, formatter::format_currency, Command, CommandArgs, Error, Result};
 
 pub(super) struct Stats;
 
@@ -28,6 +28,7 @@ impl Command for Stats {
     }
 }
 
+impl CommandArgs for Stats {}
 
 impl fmt::Display for db::stats::Stats {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {

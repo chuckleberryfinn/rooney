@@ -1,7 +1,7 @@
 use std::fmt;
 use titlecase::titlecase;
 
-use super::{db, Command, Error, Result};
+use super::{db, Command, CommandArgs, Error, Result};
 use super::formatter::{format_change, format_currency};
 
 pub(super) struct Coin;
@@ -26,6 +26,8 @@ impl Command for Coin {
         "!coin [coin|ticker]: Get current price for a coin. Defaults to btc."
     }
 }
+
+impl CommandArgs for Coin {}
 
 impl fmt::Display for db::price::Price {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
