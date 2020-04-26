@@ -14,12 +14,12 @@ impl Messenger for IrcClient {
             if let Command::PRIVMSG(ref target, ref msg) = message.command {
                 match handler(&msg) {
                     Ok(response) => {
-                        info!("{}: {}", target, response);
                         self.send_privmsg(message.response_target().unwrap(), &response)
                             .unwrap_or_else(|e| warn!("{}", e))
                     }
                     Err(e) => warn!("{}: {}", target, e),
                 }
+                info!("{} said {} to {}", message.source_nickname().unwrap(), msg, target);
             }
         })?)
     }
