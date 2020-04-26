@@ -62,7 +62,6 @@ impl Command for Remark {
                 Some(r) => Ok(r),
                 None => Err(Error::Contact)
             }
-            
         }
     }
 

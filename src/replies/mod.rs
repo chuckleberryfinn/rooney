@@ -93,8 +93,8 @@ trait Command {
 
     fn parse_coin_arg(&self, words: &[&str]) -> String {
         match words.len() {
-            0 => "bitcoin".to_string(),
-            _ => words[0].to_string().to_lowercase(),
+            1 => "bitcoin".to_string(),
+            _ => words[1].to_string().to_lowercase(),
         }
     }
     
@@ -110,9 +110,9 @@ trait Command {
     }
     
     fn parse_date(&self, words: &[&str]) -> NaiveDate {
-        let date = match words.len().cmp(&1) {
-            Ordering::Equal => words[0],
-            Ordering::Greater => words[1],
+        let date = match words.len().cmp(&2) {
+            Ordering::Equal => words[1],
+            Ordering::Greater => words[2],
             Ordering::Less => "Yesterday"
         };
 
@@ -120,9 +120,9 @@ trait Command {
     }
 
     fn parse_amount(&self, words: &[&str]) -> f32 {
-        let amount = match words.len().cmp(&1) {
-            Ordering::Equal => words[0],
-            Ordering::Greater => words[1],
+        let amount = match words.len().cmp(&2) {
+            Ordering::Equal => words[1],
+            Ordering::Greater => words[2],
             Ordering::Less => "1.0"
         };
 
