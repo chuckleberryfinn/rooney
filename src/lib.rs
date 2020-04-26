@@ -3,7 +3,7 @@ extern crate log;
 extern crate env_logger;
 
 mod db;
-mod replies;
+mod commands;
 
 use std::env;
 
@@ -24,7 +24,7 @@ pub fn run() {
 
     let mut reactor = IrcReactor::new().unwrap();
     let client = reactor.prepare_client_and_connect(&config).unwrap();
-    let commands = replies::Commands::new();
+    let commands = commands::Commands::new();
 
     client.identify().unwrap();
 
