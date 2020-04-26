@@ -71,6 +71,8 @@ impl Commands {
 pub enum Error {
     #[fail(display = "Cannot contact database")]
     Contact,
+    #[fail(display = "Command is on cooldown")]
+    Cooldown,
 }
 
 
