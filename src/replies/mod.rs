@@ -1,9 +1,9 @@
 use super::db;
 use std::cmp::Ordering;
 use std::str::FromStr;
-use std::time;
 
 use chrono::{Duration, NaiveDate, Utc};
+use std::time::Instant;
 use failure::Fail;
 
 mod advice;
@@ -16,24 +16,22 @@ mod price;
 mod remark;
 mod stats;
 
-const COOLDOWN: u64 = 3;
-
 
 pub struct Commands {
     commands: Vec<Box<dyn Command>>,
-    db: db::DB,
-    last_call: Option<time::Instant>
+    remark: Box<dyn Command>,
+    db: db::DB
 }
 
 
 impl Commands {
     pub(super) fn new() -> Commands {
         Commands {
-            commands: vec![Box::new(advice::Advice), Box::new(ats::ATS), Box::new(diff::Diff),
+            commands: vec![Box::new(advice::Advice::new()), Box::new(ats::ATS), Box::new(diff::Diff),
                            Box::new(fiat::Fiat), Box::new(movers::Bulls), Box::new(movers::Bears),
                            Box::new(price::Coin), Box::new(stats::Stats)],
-            db: db::DB::new(),
-            last_call: None
+            remark: Box::new(remark::Remark::new()),
+            db: db::DB::new()
         }
     }
 
@@ -47,22 +45,19 @@ impl Commands {
                 None => self.help(),
                 Some(r) => {
                     let mut split = r.splitn(2, ' ');
-                    match self.find_command(&split.next().unwrap()) {
-                        None => self.help(),
-                        Some(c) => Ok(c.help().to_string()),
+                    let c = self.find_command(&split.next().unwrap());
+                    match c.name() {
+                        "remark" => self.help(),
+                        _ => Ok(c.help().to_string()),
                     }
                 }
             }
         }
-
-        match self.find_command(&command) {
-            Some(c) => c.run(&self.db, &rest),
-            None => Ok(remark::get_remark(&self.db, &message).unwrap())
-        }
+        self.find_command(&command).run(&self.db, &rest)
     }
 
-    fn find_command(&self, command: &str) -> Option<&Box<dyn Command>> {
-        self.commands.iter().find(|c| c.name() == command)
+    fn find_command(&self, command: &str) -> &Box<dyn Command> {
+        self.commands.iter().find(|c| c.name() == command).unwrap_or(&self.remark)
     }
 
     fn help(&self) -> Result<String> {
@@ -82,6 +77,13 @@ pub enum Error {
 
 
 pub(super) type Result<T, E = Error> = std::result::Result<T, E>;
+
+
+trait Cooldown {
+    fn get_last_call(&self) -> Option<Instant>;
+    fn set_last_call(&self);
+    fn on_cooldown(&self) -> bool;
+}
 
 
 trait Command {

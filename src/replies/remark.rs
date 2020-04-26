@@ -1,38 +1,68 @@
+use super::{db, Command, Cooldown, Error, Result};
 use std::cell::RefCell;
 use std::time::{Duration, Instant};
 
-use super::db;
 
 const COOLDOWN: u64 = 3;
 
-thread_local! {
-    pub static LAST_CALL: RefCell<Option<Instant>> = RefCell::new(None);
+
+pub(super) struct Remark {
+    last_call: RefCell<Option<Instant>>
 }
 
-fn get_last_call() -> Option<Instant> {
-    LAST_CALL.with(|last_call| *last_call.borrow())
+
+impl Remark {
+    pub(super) fn new() -> Self {
+        Self {
+            last_call: RefCell::new(None)
+        }
+    }
 }
 
-fn set_last_call() {
-    LAST_CALL.with(|last_call| {
-        *last_call.borrow_mut() = Some(Instant::now())
-    });
-}
 
-pub fn get_remark(db: &db::DB, msg: &str) -> Option<String> {
-    match get_last_call() {
-        None => {
-            set_last_call();
-            db.get_remark(msg)
-        },
-        i => {
-            match i.unwrap_or_else(Instant::now).elapsed() {
-                d if d > Duration::new(60*COOLDOWN, 0) => {
-                    set_last_call();
-                    db.get_remark(msg)
-                },
-                _ => None
+impl Cooldown for Remark {
+    fn get_last_call(&self) -> Option<Instant> {
+        *self.last_call.borrow()
+    }
+
+    fn set_last_call(&self) {
+        *self.last_call.borrow_mut() = Some(Instant::now())
+    }
+
+    fn on_cooldown(&self) -> bool {
+        match self.get_last_call() {
+            None => {
+                self.set_last_call();
+                false
+            },
+            last_call => {
+                let elapsed = last_call.unwrap_or_else(Instant::now).elapsed();
+                if elapsed > Duration::new(60*COOLDOWN, 0) {
+                    self.set_last_call();
+                    false
+                } else {
+                    true
+                }
             }
         }
+    }
+}
+
+
+impl Command for Remark {
+    fn name(&self) -> &'static str {
+        "remark"
+    }
+
+    fn run(&self, db: &db::DB, msg: &Option<&str>) -> Result<String> {
+        if self.on_cooldown() {
+            Err(Error::Contact)
+        } else {
+            Ok(db.get_remark(msg.unwrap()).unwrap())
+        }
+    }
+
+    fn help(&self) -> &'static str {
+        ""
     }
 }
