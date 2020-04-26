@@ -58,7 +58,11 @@ impl Command for Remark {
         if self.on_cooldown() {
             Err(Error::Contact)
         } else {
-            Ok(db.get_remark(msg.unwrap()).unwrap())
+            match db.get_remark(msg.unwrap()) {
+                Some(r) => Ok(r),
+                None => Err(Error::Contact)
+            }
+            
         }
     }
 
