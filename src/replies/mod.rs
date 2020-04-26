@@ -53,7 +53,7 @@ impl Commands {
                 }
             }
         }
-        self.find_command(&command).run(&self.db, &rest)
+        self.find_command(&command).run(&self.db, &Some(message))
     }
 
     fn find_command(&self, command: &str) -> &Box<dyn Command> {
