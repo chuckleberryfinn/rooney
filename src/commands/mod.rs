@@ -73,6 +73,8 @@ pub enum Error {
     Contact,
     #[fail(display = "Command is on cooldown")]
     Cooldown,
+    #[fail(display = "No reply")]
+    Reply,
 }
 
 
