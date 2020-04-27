@@ -1,35 +1,17 @@
-extern crate chrono;
+use std::env;
 
-#[macro_use]
-extern crate log;
-extern crate std_logger;
+fn main() -> rooney::Result<()> {
+    env_logger::init();
+    let args: Vec<String> = env::args().collect();
 
-mod db;
-mod replies;
-
-use irc::client::prelude::*;
-
-fn main() {
-    let config = Config::load("configuration/config.toml").unwrap();
-
-    let mut reactor = IrcReactor::new().unwrap();
-    let client = reactor.prepare_client_and_connect(&config).unwrap();
-    let replies = replies::Replies::new();
-    std_logger::init();
-
-    client.identify().unwrap();
-
-    reactor.register_client_with_handler(client, move |client, message| {
-        if let Command::PRIVMSG(ref target, ref msg) = message.command {
-            match replies.handle_message(&msg) {
-                Some(response) => client.send_privmsg(message.response_target().unwrap(), response)?,
-                None => (),
-            }
-            info!("{} said {} to {}", message.source_nickname().unwrap(), msg, target);
+    let config = if args.len() == 1 {
+        "configuration/DebugConfig.toml"
+    } else {
+        match args[1].as_str() {
+            "release" => "configuration/Config.toml",
+            _ => "configuration/DebugConfig.toml"
         }
-
-        Ok(())
-    });
-
-    reactor.run().unwrap();
+    };
+    
+    rooney::bot(irc::client::prelude::IrcClient::new(&config)?)
 }
