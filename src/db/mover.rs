@@ -1,3 +1,8 @@
+use std::fmt;
+use titlecase::titlecase;
+
+use super::formatter::format_change;
+
 use postgres::Connection;
 
 pub struct Mover {
@@ -34,4 +39,11 @@ fn query(connection: &Connection, sort: &str) -> Option<Vec<Mover>> {
         }
 
         Some(rows.into_iter().map(|r| Mover {name: r.get(0), ticker: r.get(1), diff: r.get(4)}).collect::<Vec<Mover>>())
+}
+
+
+impl fmt::Display for Mover {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{} ({}) {} Today\x03", titlecase(&self.name), self.ticker.to_uppercase(), format_change(self.diff))
+    }
 }
