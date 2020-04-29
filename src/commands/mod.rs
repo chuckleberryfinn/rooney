@@ -10,7 +10,6 @@ mod advice;
 mod ats;
 mod diff;
 mod fiat;
-mod formatter;
 mod movers;
 mod price;
 mod remark;

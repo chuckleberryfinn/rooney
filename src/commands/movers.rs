@@ -1,8 +1,4 @@
-use std::fmt;
-use titlecase::titlecase;
-
 use super::{db, Command, CommandArgs, Error, Result};
-use super::formatter::format_change;
 
 pub(super) struct Bulls;
 
@@ -49,9 +45,3 @@ impl Command for Bears {
 }
 
 impl CommandArgs for Bears {}
-
-impl fmt::Display for db::mover::Mover {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{} ({}) {} Today\x03", titlecase(&self.name), self.ticker.to_uppercase(), format_change(self.diff))
-    }
-}

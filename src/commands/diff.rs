@@ -1,8 +1,4 @@
-use std::fmt;
-use titlecase::titlecase;
-
 use super::{db, Command, CommandArgs, Error, Result};
-use super::formatter::{format_change, format_currency};
 
 pub(super) struct Diff;
 
@@ -30,11 +26,3 @@ impl Command for Diff {
 }
 
 impl CommandArgs for Diff {}
-
-impl fmt::Display for db::diff::Diff {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Diff for {} ({}) from {} to {}: First: €{} Latest: €{} Diff: {} To Date",
-                titlecase(&self.name), self.ticker.to_uppercase(), self.start, self.end,
-                format_currency(self.first), format_currency(self.last), format_change(self.diff))
-    }
-}
