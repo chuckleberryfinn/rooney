@@ -1,3 +1,8 @@
+use std::fmt;
+use titlecase::titlecase;
+
+use super::formatter::{format_change, format_currency};
+
 use postgres::Connection;
 
 use chrono::{NaiveDate, NaiveDateTime};
@@ -45,4 +50,12 @@ pub fn query(connection: &Connection, coin: String, date: NaiveDate) -> Option<D
         last: row.get(5),
         diff: row.get(6),
     })
+}
+
+impl fmt::Display for Diff {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Diff for {} ({}) from {} to {}: First: €{} Latest: €{} Diff: {} To Date",
+                titlecase(&self.name), self.ticker.to_uppercase(), self.start, self.end,
+                format_currency(self.first), format_currency(self.last), format_change(self.diff))
+    }
 }

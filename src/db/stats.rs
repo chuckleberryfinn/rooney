@@ -1,5 +1,9 @@
+use std::fmt;
+use titlecase::titlecase;
 use chrono::NaiveDate;
 use postgres::Connection;
+
+use super::formatter::format_currency;
 
 pub struct Stats {
     pub name: String,
@@ -36,4 +40,14 @@ pub fn query(connection: &Connection, coin: String, date: NaiveDate) -> Option<S
         std_dev: row.get(6),
         max: row.get(7),
     })
+}
+
+
+impl fmt::Display for Stats {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Stats for {} ({}) on {}: Min €{} Mean €{} Std Dev €{} Median €{} Max €{}",
+                titlecase(&self.name), self.ticker.to_uppercase(), self.date, format_currency(self.min),
+                format_currency(self.average), format_currency(self.std_dev),
+                format_currency(self.median), format_currency(self.max))
+    }
 }

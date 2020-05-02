@@ -11,10 +11,13 @@ use mover::Mover;
 use stats::Stats;
 use diff::Diff;
 use price::Price;
+use fiat::Fiat;
 
 pub mod advice;
 pub mod ats;
 pub mod diff;
+pub mod fiat;
+pub mod formatter;
 pub mod mover;
 pub mod nicks;
 pub mod price;
@@ -86,5 +89,9 @@ impl DB {
 
     pub fn get_remark(&self, msg: &str) -> Option<String> {
         remarks::query(&self.connection, msg)
+    }
+
+    pub fn get_fiat(&self, coin: String, amount: f32) -> Option<Fiat> {
+        fiat::query(&self.connection, coin, amount)
     }
 }

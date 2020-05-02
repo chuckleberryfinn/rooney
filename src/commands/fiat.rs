@@ -1,6 +1,4 @@
-use titlecase::titlecase;
-
-use super::{db, formatter::format_currency, Command, CommandArgs, Error, Result};
+use super::{db, Command, CommandArgs, Error, Result};
 
 pub(super) struct Fiat;
 
@@ -13,11 +11,10 @@ impl Command for Fiat {
         let commands: Vec<&str> = msg.unwrap().split_whitespace().collect();
         let coin = self.get_coin(&db, self.parse_coin_arg(&commands));
         let amount = self.parse_amount(&commands);
-        let price = db.get_latest_price(coin);
+        let fiat = db.get_fiat(coin, amount);
 
-        match price {
-            Some(p) => Ok(format!("{} {} ({}) is worth €{} at €{} per coin", amount, titlecase(&p.name),
-                          p.ticker.to_uppercase(), format_currency(amount * p.euro), format_currency(p.euro))),
+        match fiat {
+            Some(f) => Ok(format!("{}", f)),
             None => Err(Error::Contact)
         }
     }

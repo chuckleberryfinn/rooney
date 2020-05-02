@@ -1,9 +1,4 @@
-use std::fmt;
-use titlecase::titlecase;
-
 use super::{db, Command, CommandArgs, Error, Result};
-use super::formatter::{format_change, format_currency};
-
 pub(super) struct Coin;
 
 impl Command for Coin {
@@ -28,12 +23,3 @@ impl Command for Coin {
 }
 
 impl CommandArgs for Coin {}
-
-impl fmt::Display for db::price::Price {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Current price for {} ({}): €{} ${} 24h Low: €{} Median: €{} 24h High: €{} {} Today",
-                    titlecase(&self.name), self.ticker.to_uppercase(), format_currency(self.euro),
-                    format_currency(self.dollar), format_currency(self.min), format_currency(self.median),
-                    format_currency(self.max), format_change(self.change))
-    }
-}

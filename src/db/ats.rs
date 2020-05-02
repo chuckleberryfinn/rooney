@@ -1,3 +1,7 @@
+use std::fmt;
+use titlecase::titlecase;
+
+use super::formatter::format_currency;
 use postgres::Connection;
 
 use chrono::NaiveDate;
@@ -68,4 +72,13 @@ pub fn query(connection: &Connection, coin: String) -> Option<ATS> {
             highest_date: highest.get(0),
             highest: highest.get(1)
         })
+}
+
+
+impl fmt::Display for ATS {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "All time \x0305Low\x03/\x0303High\x03 Prices for {}, Lowest: \x0305€{}\x03 on {} Highest: \x0303€{}\x03 on {}",
+            titlecase(&self.name), format_currency(self.lowest), self.lowest_date, format_currency(self.highest), self.highest_date
+        )
+    }
 }
