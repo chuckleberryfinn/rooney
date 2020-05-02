@@ -1,5 +1,4 @@
 use super::{db, Command, CommandArgs, Error, Result};
-
 pub(super) struct Stats;
 
 impl Command for Stats {

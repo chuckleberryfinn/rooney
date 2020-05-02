@@ -1,5 +1,4 @@
 use super::{db, Command, CommandArgs, Error, Result};
-
 pub(super) struct Coin;
 
 impl Command for Coin {
