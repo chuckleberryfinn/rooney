@@ -7,7 +7,7 @@ use postgres::{Connection, TlsMode};
 use toml::Value;
 
 use ats::ATS;
-use mover::Mover;
+use mover::Movers;
 use stats::Stats;
 use diff::Diff;
 use price::Price;
@@ -71,11 +71,11 @@ impl DB {
         ats::query(&self.connection, coin)
     }
 
-    pub fn get_bulls(&self) -> Option<Vec<Mover>> {
+    pub fn get_bulls(&self) -> Option<Movers> {
         mover::get_bulls(&self.connection)
     }
 
-    pub fn get_bears(&self) -> Option<Vec<Mover>> {
+    pub fn get_bears(&self) -> Option<Movers> {
         mover::get_bears(&self.connection)
     }
 

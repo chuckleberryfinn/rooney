@@ -10,7 +10,7 @@ impl Command for Bulls {
         let movers = db.get_bulls();
 
         match movers {
-            Some(ms) => Ok(ms.into_iter().map(|m| format!("{}", m)).collect::<Vec<String>>().join(" ")),
+            Some(ms) => Ok(format!("{}", ms)),
             None => Err(Error::Contact)
         }
     }
@@ -33,7 +33,7 @@ impl Command for Bears {
         let movers = db.get_bears();
 
         match movers {
-            Some(ms) => Ok(ms.into_iter().map(|m| format!("{}", m)).collect::<Vec<String>>().join(" ")),
+            Some(ms) => Ok(format!("{}", ms)),
             None => Err(Error::Contact)
         }
     }

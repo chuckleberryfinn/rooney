@@ -5,21 +5,26 @@ use super::formatter::format_change;
 
 use postgres::Connection;
 
-pub struct Mover {
+
+struct Mover {
     pub name: String,
     pub ticker: String,
     pub diff: f32
 }
 
-pub fn get_bears(connection: &Connection) -> Option<Vec<Mover>> {
+pub struct Movers {
+    movers: Vec<Mover>
+}
+
+pub fn get_bears(connection: &Connection) -> Option<Movers> {
     query(connection, "asc")
 }
 
-pub fn get_bulls(connection: &Connection) -> Option<Vec<Mover>> {
+pub fn get_bulls(connection: &Connection) -> Option<Movers> {
     query(connection, "desc")
 }
 
-fn query(connection: &Connection, sort: &str) -> Option<Vec<Mover>> {
+fn query(connection: &Connection, sort: &str) -> Option<Movers> {
     let query =
         format!(
         "with movers as (
@@ -38,12 +43,19 @@ fn query(connection: &Connection, sort: &str) -> Option<Vec<Mover>> {
             return None;
         }
 
-        Some(rows.into_iter().map(|r| Mover {name: r.get(0), ticker: r.get(1), diff: r.get(4)}).collect::<Vec<Mover>>())
+        Some(Movers {movers: rows.into_iter().map(|r| Mover {name: r.get(0), ticker: r.get(1), diff: r.get(4)}).collect::<Vec<Mover>>()})
 }
 
 
 impl fmt::Display for Mover {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{} ({}) {} Today\x03", titlecase(&self.name), self.ticker.to_uppercase(), format_change(self.diff))
+    }
+}
+
+
+impl fmt::Display for Movers {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{} {} {}", self.movers[0], self.movers[1], self.movers[2])
     }
 }
