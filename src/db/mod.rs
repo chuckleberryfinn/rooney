@@ -2,15 +2,11 @@ use std::collections::{HashMap, HashSet};
 use std::fs;
 use std::iter::FromIterator;
 
-use chrono::{NaiveDate};
 use postgres::{Connection, TlsMode};
 use toml::Value;
 
-use stats::Stats;
-
-pub mod formatter;
 pub mod nicks;
-pub mod stats;
+
 
 fn read_config(path: &str) -> Value {
     let toml_content = fs::read_to_string(path)
@@ -45,9 +41,5 @@ impl DB {
 
     fn get_coins(nicks_coins: &HashMap<String, String>) -> HashSet<String> {
         HashSet::from_iter(nicks_coins.values().cloned())
-    }
-
-    pub fn get_stats(&self, coin: String, date: NaiveDate) -> Option<Stats> {
-        stats::query(&self.connection, coin, date)
     }
 }
