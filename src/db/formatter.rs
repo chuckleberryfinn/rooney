@@ -20,14 +20,6 @@ pub fn format_currency(value: f32) -> String {
     format!("{}0", s)
 }
 
-pub fn format_change(diff: f32) -> String {
-    if diff < 0.0 {
-        return format!("\x0305Down: {:.2}%", diff.abs());
-    }
-
-    format!("\x0303Up: {:.2}%", diff)
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;

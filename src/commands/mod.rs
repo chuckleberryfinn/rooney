@@ -10,6 +10,7 @@ mod advice;
 mod ats;
 mod diff;
 mod fiat;
+mod formatter;
 mod movers;
 mod price;
 mod remark;
@@ -55,8 +56,8 @@ impl Commands {
         self.find_command(&command).run(&self.db, &Some(message))
     }
 
-    fn find_command(&self, command: &str) -> &Box<dyn Command> {
-        self.commands.iter().find(|c| c.name() == command).unwrap_or(&self.remark)
+    fn find_command(&self, command: &str) -> &dyn Command {
+        &**self.commands.iter().find(|c| c.name() == command).unwrap_or(&self.remark)
     }
 
     fn help(&self) -> Result<String> {

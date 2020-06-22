@@ -1,6 +1,35 @@
-use super::{db, Command, CommandArgs, Error, Result};
+use std::fmt;
+
+use titlecase::titlecase;
+
+use super::{db, Command, CommandArgs, Error, formatter::format_currency, price, Result};
 
 pub(super) struct Fiat;
+
+
+struct _Fiat {
+    name: String,
+    ticker: String,
+    amount: f32,
+    euro: f32,
+}
+
+
+impl Fiat {
+    fn query(&self, db: &db::DB, coin: String, amount: f32) -> Option<String> {
+        let price = price::Coin.query(db, &coin).unwrap();
+    
+        let f = _Fiat {
+            name: coin,
+            amount,
+            ticker: price.ticker,
+            euro: price.euro
+        };
+
+        Some(f.to_string())
+    }
+}
+
 
 impl Command for Fiat {
     fn name(&self) -> &'static str {
@@ -11,10 +40,10 @@ impl Command for Fiat {
         let commands: Vec<&str> = msg.unwrap().split_whitespace().collect();
         let coin = self.get_coin(&db, self.parse_coin_arg(&commands));
         let amount = self.parse_amount(&commands);
-        let fiat = db.get_fiat(coin, amount);
+        let fiat = self.query(&db, coin, amount);
 
         match fiat {
-            Some(f) => Ok(format!("{}", f)),
+            Some(f) => Ok(f),
             None => Err(Error::Contact)
         }
     }
@@ -25,4 +54,13 @@ impl Command for Fiat {
     }
 }
 
+
 impl CommandArgs for Fiat {}
+
+
+impl fmt::Display for _Fiat {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{} {} ({}) is worth €{} at €{} per coin", self.amount, titlecase(&self.name),
+                self.ticker.to_uppercase(), format_currency(self.amount * self.euro), format_currency(self.euro))
+    }
+}
