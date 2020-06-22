@@ -16,17 +16,15 @@ struct _Fiat {
 
 
 impl Fiat {
-    fn query(&self, db: &db::DB, coin: String, amount: f32) -> Option<String> {
+    fn query(&self, db: &db::DB, coin: String, amount: f32) -> Option<_Fiat> {
         let price = price::Coin.query(db, &coin).unwrap();
     
-        let f = _Fiat {
+        Some(_Fiat {
             name: coin,
             amount,
             ticker: price.ticker,
             euro: price.euro
-        };
-
-        Some(f.to_string())
+        })
     }
 }
 
@@ -43,7 +41,7 @@ impl Command for Fiat {
         let fiat = self.query(&db, coin, amount);
 
         match fiat {
-            Some(f) => Ok(f),
+            Some(f) => Ok(f.to_string()),
             None => Err(Error::Contact)
         }
     }

@@ -65,7 +65,7 @@ impl Coin {
         }
     
         let row = rows.get(0);
-        let c = _Coin {
+        Some(_Coin {
             name: row.get(0),
             ticker: row.get(1),
             euro: row.get(2),
@@ -74,9 +74,7 @@ impl Coin {
             max: row.get(5),
             change: row.get(6),
             median: row.get(7),
-        };
-
-        Some(c)
+        })
     }
 }
 
@@ -102,7 +100,7 @@ impl Command for Coin {
         let price = self.query(&db, &coin);
 
         match price {
-            Some(p) => Ok(format!("{}", p)),
+            Some(p) => Ok(p.to_string()),
             None => Err(Error::Contact)
         }
     }

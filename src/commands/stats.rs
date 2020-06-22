@@ -23,7 +23,8 @@ struct _Stats {
 impl Stats {
     fn query(&self, db: &db::DB, coin: String, date: NaiveDate) -> Option<_Stats> {
         let query =
-            "select name, ticker, date, cast(min_euro as real), cast(average_euro as real), cast(median_euro as real), cast(std_dev as real), cast(max_euro as real)
+            "select name, ticker, date, cast(min_euro as real), cast(average_euro as real), cast(median_euro as real),
+                cast(std_dev as real), cast(max_euro as real)
                 from daily_stats
                 join coins using(coin_id)
                 where name = $1

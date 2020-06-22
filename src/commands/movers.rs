@@ -51,7 +51,7 @@ impl Command for Bulls {
         let movers = self.query(db);
 
         match movers {
-            Some(ms) => Ok(format!("{}", ms)),
+            Some(ms) => Ok(ms.to_string()),
             None => Err(Error::Contact)
         }
     }
@@ -99,7 +99,7 @@ impl Command for Bears {
         let movers = self.query(&db);
 
         match movers {
-            Some(ms) => Ok(format!("{}", ms)),
+            Some(ms) => Ok(ms.to_string()),
             None => Err(Error::Contact)
         }
     }

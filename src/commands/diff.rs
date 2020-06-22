@@ -21,7 +21,7 @@ struct _Diff {
 
 
 impl Diff {
-    fn query(&self, db: &db::DB, coin: String, date: NaiveDate) -> Option<String> {
+    fn query(&self, db: &db::DB, coin: String, date: NaiveDate) -> Option<_Diff> {
         let query =
             "with first as (
                 select coin_id, date, average_euro as first
@@ -45,7 +45,7 @@ impl Diff {
         }
     
         let row = rows.get(0);
-        let d = _Diff{
+        Some(_Diff{
             name: row.get(0),
             ticker: row.get(1),
             start: row.get(2),
@@ -53,8 +53,7 @@ impl Diff {
             first: row.get(4),
             last: row.get(5),
             diff: row.get(6),
-        };
-        Some(d.to_string())
+        })
     }
     
 }
@@ -81,7 +80,7 @@ impl Command for Diff {
         let diff = self.query(&db, coin, date);
 
         match diff {
-            Some(d) => Ok(d),
+            Some(d) => Ok(d.to_string()),
             None => Err(Error::Contact)
         }
     }
