@@ -10,6 +10,7 @@ mod advice;
 mod ats;
 mod diff;
 mod fiat;
+mod formatter;
 mod movers;
 mod price;
 mod remark;
@@ -25,7 +26,7 @@ pub struct Commands {
 
 impl Commands {
     pub(super) fn new() -> Commands {
-        Commands {
+        Self {
             commands: vec![Box::new(advice::Advice::new()), Box::new(ats::ATS), Box::new(diff::Diff),
                            Box::new(fiat::Fiat), Box::new(movers::Bulls), Box::new(movers::Bears),
                            Box::new(price::Coin), Box::new(stats::Stats)],
@@ -55,8 +56,8 @@ impl Commands {
         self.find_command(&command).run(&self.db, &Some(message))
     }
 
-    fn find_command(&self, command: &str) -> &Box<dyn Command> {
-        self.commands.iter().find(|c| c.name() == command).unwrap_or(&self.remark)
+    fn find_command(&self, command: &str) -> &dyn Command {
+        &**self.commands.iter().find(|c| c.name() == command).unwrap_or(&self.remark)
     }
 
     fn help(&self) -> Result<String> {

@@ -2,27 +2,11 @@ use std::collections::{HashMap, HashSet};
 use std::fs;
 use std::iter::FromIterator;
 
-use chrono::{NaiveDate};
 use postgres::{Connection, TlsMode};
 use toml::Value;
 
-use ats::ATS;
-use mover::Movers;
-use stats::Stats;
-use diff::Diff;
-use price::Price;
-use fiat::Fiat;
-
-pub mod advice;
-pub mod ats;
-pub mod diff;
-pub mod fiat;
-pub mod formatter;
-pub mod mover;
 pub mod nicks;
-pub mod price;
-pub mod remarks;
-pub mod stats;
+
 
 fn read_config(path: &str) -> Value {
     let toml_content = fs::read_to_string(path)
@@ -31,7 +15,7 @@ fn read_config(path: &str) -> Value {
 }
 
 pub struct DB {
-    connection: Connection,
+    pub connection: Connection,
     pub all_coins: HashSet<String>,
     pub nicks_coins: HashMap<String, String>,
 }
@@ -51,47 +35,11 @@ impl DB {
         }
     }
 
-    pub fn get_advice(&self) -> Option<String> {
-        advice::query(&self.connection)
-    }
-
     fn get_nicks(connection: &Connection) -> HashMap<String, String> {
         nicks::query(connection)
     }
 
     fn get_coins(nicks_coins: &HashMap<String, String>) -> HashSet<String> {
         HashSet::from_iter(nicks_coins.values().cloned())
-    }
-
-    pub fn get_latest_price(&self, coin: String) -> Option<Price> {
-        price::query(&self.connection, &coin)
-    }
-
-    pub fn get_ats(&self, coin: String) -> Option<ATS> {
-        ats::query(&self.connection, coin)
-    }
-
-    pub fn get_bulls(&self) -> Option<Movers> {
-        mover::get_bulls(&self.connection)
-    }
-
-    pub fn get_bears(&self) -> Option<Movers> {
-        mover::get_bears(&self.connection)
-    }
-
-    pub fn get_stats(&self, coin: String, date: NaiveDate) -> Option<Stats> {
-        stats::query(&self.connection, coin, date)
-    }
-
-    pub fn get_diff(&self, coin: String, date: NaiveDate) -> Option<Diff> {
-        diff::query(&self.connection, coin, date)
-    }
-
-    pub fn get_remark(&self, msg: &str) -> Option<String> {
-        remarks::query(&self.connection, msg)
-    }
-
-    pub fn get_fiat(&self, coin: String, amount: f32) -> Option<Fiat> {
-        fiat::query(&self.connection, coin, amount)
     }
 }
