@@ -26,7 +26,7 @@ pub struct Commands {
 
 impl Commands {
     pub(super) fn new() -> Commands {
-        Commands {
+        Self {
             commands: vec![Box::new(advice::Advice::new()), Box::new(ats::ATS), Box::new(diff::Diff),
                            Box::new(fiat::Fiat), Box::new(movers::Bulls), Box::new(movers::Bears),
                            Box::new(price::Coin), Box::new(stats::Stats)],
