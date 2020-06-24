@@ -3,6 +3,7 @@ name = "rooney"
 version = "0.1.1"
 authors = ["nemo <nemo@redbrick.dcu.ie>"]
 edition = "2018"
+default-run = "rooney-bot"
 
 [dependencies]
 chrono = "0.4.0"
