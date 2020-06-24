@@ -5,8 +5,6 @@ use std::iter::FromIterator;
 use postgres::{Connection, TlsMode};
 use toml::Value;
 
-pub mod nicks;
-
 
 fn read_config(path: &str) -> Value {
     let toml_content = fs::read_to_string(path)
@@ -14,11 +12,13 @@ fn read_config(path: &str) -> Value {
     toml::from_str(&toml_content).unwrap_or_else(|_| panic!("Unable to parse TOML from {}", path))
 }
 
+
 pub struct DB {
     pub connection: Connection,
     pub all_coins: HashSet<String>,
     pub nicks_coins: HashMap<String, String>,
 }
+
 
 impl DB {
     pub fn new() -> Self {
@@ -36,7 +36,8 @@ impl DB {
     }
 
     fn get_nicks(connection: &Connection) -> HashMap<String, String> {
-        nicks::query(connection)
+        let query = "Select ticker, name from coins";
+        connection.query(query, &[]).unwrap().iter().map(|r| (r.get(0), r.get(1))).collect::<HashMap<String, String>>()
     }
 
     fn get_coins(nicks_coins: &HashMap<String, String>) -> HashSet<String> {
