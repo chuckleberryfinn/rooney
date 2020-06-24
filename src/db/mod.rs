@@ -43,3 +43,10 @@ impl DB {
         HashSet::from_iter(nicks_coins.values().cloned())
     }
 }
+
+
+impl Default for DB {
+    fn default() -> Self {
+        Self::new()
+    }
+}

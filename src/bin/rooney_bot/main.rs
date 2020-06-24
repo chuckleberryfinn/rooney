@@ -1,5 +1,4 @@
 mod commands;
-mod db;
 mod irc_handler;
 
 use failure::Fail;
