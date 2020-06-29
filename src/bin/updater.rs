@@ -1,6 +1,6 @@
 use rooney::db;
 
-use log::info;
+use log::{error, info};
 use std::collections::HashMap;
 use std::fs;
 use std::io::Read;
@@ -13,7 +13,7 @@ use rustc_serialize::json;
 
 
 #[allow(non_snake_case)]
-#[derive(Debug, RustcDecodable)]
+#[derive(Clone, Debug, RustcDecodable)]
 struct Market {
     Label: String,
     Name: String,
@@ -42,67 +42,127 @@ fn read_config(path: &str) -> Value {
 }
 
 
-fn parse_json(url: &str) -> HashMap<String, Vec<Market>> {
-    let mut res = reqwest::blocking::get(url).unwrap_or_else(|e| panic!("Unable to read response from API: {}", e));
+fn parse_json(url: &str) -> Result<Vec<Market>, String> {
+    let mut res = match reqwest::blocking::get(url) {
+        Ok(r) => r,
+        Err(e) => return Err(format!("Unable to read response from API: {}", e))
+    };
+
     let mut body = String::new();
-    res.read_to_string(&mut body).unwrap_or_else(|e| panic!("Unable to read response to string: {}", e));
-    json::decode(&body).unwrap_or_else(|e| panic!("Unable to decode JSON: {}.", e))
+    match res.read_to_string(&mut body) {
+        Ok(_) => (),
+        Err(e) => return Err(format!("Unable to read response to string: {}", e))
+    };
+
+    let json: HashMap<String, Vec<Market>> = match json::decode(&body) {
+        Ok(h) => h,
+        Err(e) => return Err(format!("Unable to decode JSON: {}.", e))
+    };
+
+    match json.get("Markets") {
+        Some(m) => Ok(m.to_vec()),
+        None => Err("JSON has unexpected format.".to_string())
+    }
 }
 
 
-fn add_coins(db: &db::DB, markets: &[Market]) {
+fn add_coins(db: &db::DB, markets: &[Market]) -> Result<(), String> {
     let args = markets.iter().map(|m| m.get_args()).collect::<Vec<_>>();
-    let transaction = db.connection.transaction().unwrap();
-    transaction.batch_execute("Create temporary table temp_coins(name varchar(255), ticker varchar(100)) on commit drop").unwrap();
+    let transaction = match db.connection.transaction() {
+        Ok(t) => t,
+        Err(e) => return Err(format!("Failed to create transaction {}", e))
+    };
+
+    match transaction.batch_execute("Create temporary table temp_coins(name varchar(255), ticker varchar(100)) on commit drop") {
+        Ok(_) => (),
+        Err(e) => return Err(format!("Failed to create temp table {}", e))
+    };
+
     for a in args {
-        transaction.execute("Insert into temp_coins(name, ticker) values ($1, $2) ", &[&a.0, &a.1],).unwrap();
+        match transaction.execute("Insert into temp_coins(name, ticker) values ($1, $2) ", &[&a.0, &a.1],) {
+            Ok(_) => (),
+            Err(e) => return Err(format!("Failed to insert into temp_coins table {}", e))
+        };
     }
-    transaction.batch_execute("Insert into coins(name, ticker) select tc.name, tc.ticker from temp_coins tc left join coins c using(name) where c.name is null").unwrap();
-    transaction.commit().unwrap();
+
+    match transaction.batch_execute("Insert into coins(name, ticker) select tc.name, tc.ticker from temp_coins tc left join coins c using(name) where c.name is null") {
+        Ok(_) => (),
+        Err(e) => return Err(format!("Failed to insert into coins table {}", e))
+    };
+
+    match transaction.commit() {
+        Ok(_) => Ok(()),
+        Err(e) => Err(format!("Failed to complete transaction {}", e))
+    }
 }
 
 
-fn coins_ids(db: &db::DB) -> Option<HashMap<String, i32>> {
-    let rows = db.connection.query("Select name, coin_id from coins;", &[]).unwrap();
-
-    if rows.is_empty() {
-        return None;
+fn coins_ids(db: &db::DB) -> Result<HashMap<String, i32>, String> {
+    match db.connection.query("Select name, coin_id from coins;", &[]) {
+        Ok(rows) => Ok(rows.iter().map(|r| (r.get::<usize, String>(0).to_lowercase(), r.get(1))).collect::<HashMap<_, _>>()),
+        Err(e) => Err(format!("Unable to find name/coin_id mappings {}", e))
     }
-
-    Some(rows.iter().map(|r| (r.get::<usize, String>(0).to_lowercase(), r.get(1))).collect::<HashMap<_, _>>())
 }
 
 
-fn update_prices(db: &db::DB, coins_ids: HashMap<String, i32>, markets: &[Market]) {
+fn update_prices(db: &db::DB, coins_ids: HashMap<String, i32>, markets: &[Market]) -> Result<(), String> {
     //This whole function is here to work around the Postgres numeric type and it's incompatibility with Rust.
-    let transaction = db.connection.transaction().unwrap();
-    transaction.batch_execute("Create temporary table temp_prices(coin_id integer, euro real, dollar real) on commit drop").unwrap();
+    let transaction = match db.connection.transaction() {
+        Ok(t) => t,
+        Err(e) => return Err(format!("Failed to create transaction {}", e))
+    };
+
+    match transaction.batch_execute("Create temporary table temp_prices(coin_id integer, euro real, dollar real) on commit drop") {
+        Ok(_) => (),
+        Err(e) => return Err(format!("Failed to create temp table {}", e))
+    };
+
     for m in markets {
         let args = m.get_args();
-        let coin_id: i32 = *coins_ids.get(&args.0).unwrap();
-        transaction.execute("Insert into temp_prices(coin_id, euro, dollar) values ($1, $2, $3) ", &[&coin_id, &args.3, &args.4],).unwrap();
+        let coin_id = coins_ids.get(&args.0).unwrap();
+        match transaction.execute("Insert into temp_prices(coin_id, euro, dollar) values ($1, $2, $3) ", &[&coin_id, &args.3, &args.4],) {
+            Ok(_) => (),
+            Err(e) => return Err(format!("Failed to insert into temp_prices table {}", e))
+        };
     }
-    transaction.batch_execute("Insert into prices(coin_id, euro, dollar) select coin_id, euro::numeric, dollar::numeric from temp_prices").unwrap();
-    transaction.commit().unwrap();
+
+    match transaction.batch_execute("Insert into prices(coin_id, euro, dollar) select coin_id, euro::numeric, dollar::numeric from temp_prices") {
+        Ok(_) => (),
+        Err(e) => return Err(format!("Failed to insert into prices table {}", e))
+    };
+
+    match transaction.commit() {
+        Ok(_) => Ok(()),
+        Err(e) => Err(format!("Failed to complete transaction {}", e))
+    }
+}
+
+
+fn run_updater(url: &str) -> Result<(), String> {
+    let markets = parse_json(&url)?;
+    let db = db::DB::new();
+    add_coins(&db, &markets)?;
+    let coins_ids = coins_ids(&db)?;
+
+    update_prices(&db, coins_ids, &markets)
 }
 
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     env_logger::init();
+    let five_mins = time::Duration::from_secs(5*60);
     let config = read_config("configuration/Updater.toml");
     let key = config["updater"]["api_key"].as_str().unwrap();
     let url = format!("https://www.worldcoinindex.com/apiservice/json?key={}", key);
-    let five_mins = time::Duration::from_secs(5*60);
 
     loop {
         info!("Get updated price");
-        let json = parse_json(&url);
-        let markets = json.get("Markets").unwrap_or_else(|| panic!("JSON has unexpected format."));
-        let db = db::DB::new();
-        add_coins(&db, &markets);
-        let coins_ids = coins_ids(&db).unwrap_or_else(|| panic!("Unable to retrieve Coins from DB."));
-        update_prices(&db, coins_ids, markets);
-        db.connection.finish()?;
+
+        match run_updater(&url) {
+            Ok(_) => (),
+            Err(e) => error!("An unexpected error occurred: {}", e)
+        };
+
         thread::sleep(five_mins);
     }
 
