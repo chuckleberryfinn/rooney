@@ -1,4 +1,4 @@
-use super::db;
+use rooney::db;
 use std::cmp::Ordering;
 use std::str::FromStr;
 
