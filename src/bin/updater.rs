@@ -8,6 +8,13 @@ use toml::Value;
 
 
 #[allow(non_snake_case)]
+#[derive(Debug, RustcDecodable)]
+struct Markets {
+    Markets: Vec<Market>
+}
+
+
+#[allow(non_snake_case)]
 #[derive(Clone, Debug, RustcDecodable)]
 struct Market {
     Label: String,
@@ -63,11 +70,8 @@ fn get_json(url: &str) -> Result<String, Box<dyn Error>> {
 
 
 fn parse_json(body: &str) -> Result<Vec<Market>, Box<dyn Error>> {
-    let json: HashMap<String, Vec<Market>> = json::decode(&body)?;
-    match json.get("Markets") {
-        Some(m) => Ok(m.to_vec()),
-        None => Err(Box::new(JSONParseError{ message: "Unable to parse markets".to_string() }))
-    }
+    let json: Markets = json::decode(&body)?;
+    Ok(json.Markets)
 }
 
 
