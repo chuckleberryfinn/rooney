@@ -29,7 +29,7 @@ impl Commands {
         Self {
             commands: vec![Box::new(advice::Advice::new()), Box::new(ats::ATS), Box::new(diff::Diff),
                            Box::new(fiat::Fiat), Box::new(movers::Bulls), Box::new(movers::Bears),
-                           Box::new(price::Coin), Box::new(stats::Stats)],
+                           Box::new(price::Coin), Box::new(price::Coin24), Box::new(stats::Stats)],
             remark: Box::new(remark::Remark::new()),
             db: db::DB::new()
         }
