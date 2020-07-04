@@ -24,7 +24,7 @@ impl Coin {
             "with daily_prices as (
                 select * from prices
                 join coins using(coin_id)
-                where time >= (select max(time::date) from prices)
+                where time >= current_date
                 and name = $1
                 order by time asc
             ),
