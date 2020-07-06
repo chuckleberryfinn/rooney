@@ -1,6 +1,6 @@
 [package]
 name = "rooney"
-version = "0.1.3"
+version = "0.1.4"
 authors = ["nemo <nemo@redbrick.dcu.ie>"]
 edition = "2018"
 default-run = "rooney_bot"

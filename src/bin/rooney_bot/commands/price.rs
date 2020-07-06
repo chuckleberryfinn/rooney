@@ -91,7 +91,7 @@ impl Command for Coin {
         let price = self.query(&db, &coin);
 
         match price {
-            Some(p) => Ok(p.to_string()),
+            Some(p) => Ok(p.display()),
             None => Err(Error::Contact)
         }
     }
@@ -194,9 +194,19 @@ impl CommandArgs for Coin24 {}
 
 impl fmt::Display for _Coin {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Current price for {} ({}): €{} ${} 24h Low: €{} Median: €{} 24h High: €{} {} Today",
+        write!(f, "Current price for {} ({}): €{} ${} 24h Low: €{} Median: €{} 24h High: €{} {} Last 24 hours",
                     titlecase(&self.name), self.ticker.to_uppercase(), format_currency(self.euro),
                     format_currency(self.dollar), format_currency(self.min), format_currency(self.median),
                     format_currency(self.max), format_change(self.change))
+    }
+}
+
+
+impl _Coin {
+    fn display(&self) -> String {
+        format!("Current price for {} ({}): €{} ${} Today's Low: €{} Median: €{} Today's High: €{} {} Today",
+                titlecase(&self.name), self.ticker.to_uppercase(), format_currency(self.euro),
+                format_currency(self.dollar), format_currency(self.min), format_currency(self.median),
+                format_currency(self.max), format_change(self.change))
     }
 }
