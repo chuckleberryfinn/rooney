@@ -79,8 +79,8 @@ impl Bears {
             )
             select name, ticker, first, last, cast((last-first)*100/first as real) as diff
             from movers
-            where first != 0
             join coins using(coin_id)
+            where first != 0
             order by diff asc limit 3;";
     
         let rows = db.connection.query(&query, &[]).unwrap();
