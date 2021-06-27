@@ -13,7 +13,8 @@ irc = "0.13"
 log = "0.4.6"
 postgres = {version = "0.15.2", features = ["with-chrono"]}
 reqwest = {version = "0.10.6", features = ["blocking"]}
-rustc-serialize = "0.3"
+serde = { version = "=1.0.117", features = ["derive"] }
+serde_json = { version = "1.0.0" }
 separator = "0.3.1"
-toml = "0.5.1"
+toml = "=0.5.5"
 titlecase = "0.9"
