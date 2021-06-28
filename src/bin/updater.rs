@@ -3,19 +3,20 @@ use std::{collections::HashMap, error::Error, fmt, fs, io::Read, thread, time};
 use rooney::db;
 
 use log::{error, info};
-use rustc_serialize::json;
+use serde::{Deserialize, Serialize};
+use serde_json;
 use toml::Value;
 
 
 #[allow(non_snake_case)]
-#[derive(Debug, RustcDecodable)]
+#[derive(Debug, Serialize, Deserialize)]
 struct Markets {
     Markets: Vec<Market>
 }
 
 
 #[allow(non_snake_case)]
-#[derive(Clone, Debug, RustcDecodable)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 struct Market {
     Label: String,
     Name: String,
@@ -70,7 +71,7 @@ fn get_json(url: &str) -> Result<String, Box<dyn Error>> {
 
 
 fn parse_json(body: &str) -> Result<Vec<Market>, Box<dyn Error>> {
-    let json: Markets = json::decode(&body)?;
+    let json: Markets = serde_json::from_str(&body)?;
     Ok(json.Markets)
 }
 
