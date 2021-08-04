@@ -127,7 +127,11 @@ fn get_updates(url: &str) -> Result<(), String> {
         Err(e) => return Err(format!("Unable to parse JSON: {}", e))
     };
 
-    let db = db::DB::new();
+    let db = match db::DB::new() {
+        Ok(db) => db,
+        Err(e) => return Err(format!("Unable to access DB: {}", e))
+    };
+
     match add_coins(&db, &markets) {
         Ok(()) => (),
         Err(e) => return Err(format!("Unable to add coins: {}", e))
