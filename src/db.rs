@@ -2,7 +2,7 @@ use std::collections::{HashMap, HashSet};
 use std::fs;
 use std::iter::FromIterator;
 
-use postgres::{Connection, TlsMode};
+use postgres::{Connection, Error, TlsMode};
 use toml::Value;
 
 
@@ -21,18 +21,17 @@ pub struct DB {
 
 
 impl DB {
-    pub fn new() -> Self {
+    pub fn new() -> Result<Self, Error> {
         let config = read_config("configuration/DB.toml");
-        let c = Connection::connect(config["database"]["connection"].as_str().unwrap(), TlsMode::None)
-                                    .expect("Error connecting to database");
+        let c = Connection::connect(config["database"]["connection"].as_str().unwrap(), TlsMode::None)?;
         let nicks_coins = DB::get_nicks(&c);
         let all_coins = DB::get_coins(&nicks_coins);
 
-        Self {
+        Ok(Self {
             all_coins,
             nicks_coins,
             connection: c,
-        }
+        })
     }
 
     fn get_nicks(connection: &Connection) -> HashMap<String, String> {
@@ -42,12 +41,5 @@ impl DB {
 
     fn get_coins(nicks_coins: &HashMap<String, String>) -> HashSet<String> {
         HashSet::from_iter(nicks_coins.values().cloned())
-    }
-}
-
-
-impl Default for DB {
-    fn default() -> Self {
-        Self::new()
     }
 }

@@ -6,7 +6,10 @@ use std::env;
 
 
 fn bot(messenger: impl Messenger) -> Result<()> {
-    let commands = commands::Commands::new();
+    let commands = match commands::Commands::new() {
+        Ok(c) => c,
+        Err(_) => return Err(Error::Contact)
+    };
 
     messenger.init()?;
     messenger.run(|m| commands.handle(m))
@@ -23,6 +26,8 @@ trait Messenger {
 enum Error {
     #[fail(display = "Messenger error {}", _0)]
     Messenger(#[cause] Box<dyn Fail>),
+    #[fail(display = "Cannot contact database")]
+    Contact,
 }
 
 
