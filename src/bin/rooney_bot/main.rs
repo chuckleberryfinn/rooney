@@ -2,7 +2,8 @@ mod commands;
 mod irc_handler;
 
 use failure::Fail;
-use std::env;
+use log::{error, info};
+use std::{env, thread, time};
 
 
 fn bot(messenger: impl Messenger) -> Result<()> {
@@ -37,6 +38,7 @@ type Result<T, E = Error> = std::result::Result<T, E>;
 fn main() -> Result<()> {
     env_logger::init();
     let args: Vec<String> = env::args().collect();
+    let five_mins = time::Duration::from_secs(5*60);
 
     let config = if args.len() == 1 {
         "configuration/DebugConfig.toml"
@@ -46,6 +48,15 @@ fn main() -> Result<()> {
             _ => "configuration/DebugConfig.toml"
         }
     };
-    
-    bot(irc::client::prelude::IrcClient::new(&config)?)
+
+    loop {
+        info!("Starting bot");
+
+        match bot(irc::client::prelude::IrcClient::new(&config)?) {
+            Ok(_) => (),
+            Err(e) => error!("An unexpected error occurred: {}", e)
+        };
+
+        thread::sleep(five_mins);
+    }
 }

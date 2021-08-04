@@ -4,7 +4,6 @@ use rooney::db;
 
 use log::{error, info};
 use serde::{Deserialize, Serialize};
-use serde_json;
 use toml::Value;
 
 

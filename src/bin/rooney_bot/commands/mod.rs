@@ -36,7 +36,7 @@ impl Commands {
                            Box::new(fiat::Fiat), Box::new(movers::Bulls), Box::new(movers::Bears),
                            Box::new(price::Coin), Box::new(price::Coin24), Box::new(stats::Stats)],
             remark: Box::new(remark::Remark::new()),
-            db: db
+            db
         })
     }
 
