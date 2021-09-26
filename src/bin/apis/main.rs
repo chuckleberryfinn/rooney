@@ -31,16 +31,14 @@ pub struct Price {
     ticker: String,
     euro: f32,
     dollar: f32,
-    min: f32,
-    max: f32,
-    change: f32,
-    median: f32,
+    time: String,
 }
 
 
 pub fn query(db: &db::DB, coin: &str) -> Option<Vec<Price>> {
     let query =
-        "select * from prices
+        "select name, ticker, euro, dollar, time
+        from prices
         join coins using(coin_id)
         where time >= now() - interval '24 hours'
         and name = $1
@@ -58,10 +56,7 @@ pub fn query(db: &db::DB, coin: &str) -> Option<Vec<Price>> {
             ticker: row.get(1),
             euro: row.get(2),
             dollar: row.get(3),
-            min: row.get(4),
-            max: row.get(5),
-            change: row.get(6),
-            median: row.get(7),
+            time: row.get(4),
             }
         )
         .collect())
