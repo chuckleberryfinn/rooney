@@ -2,6 +2,7 @@
 use rooney::db;
 
 use log::{error, info};
+use serde::{Deserialize, Serialize};
 
 
 fn get_coin(db: &db::DB, coin: String) -> String {
@@ -16,11 +17,64 @@ fn get_coin(db: &db::DB, coin: String) -> String {
 }
 
 
+#[allow(non_snake_case)]
+#[derive(Debug, Serialize, Deserialize)]
+struct Prices {
+    Prices: Vec<Price>
+}
+
+
+#[allow(non_snake_case)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct Price {
+    name: String,
+    ticker: String,
+    euro: f32,
+    dollar: f32,
+    min: f32,
+    max: f32,
+    change: f32,
+    median: f32,
+}
+
+
+pub fn query(db: &db::DB, coin: &str) -> Option<Vec<Price>> {
+    let query =
+        "select * from prices
+        join coins using(coin_id)
+        where time >= now() - interval '24 hours'
+        and name = $1
+        order by time asc";
+
+    let rows = db.connection.query(query, &[&coin]).unwrap();
+    if rows.is_empty() {
+        return None;
+    }
+
+    Some(rows
+        .iter()
+        .map(|row| Price {
+            name: row.get(0),
+            ticker: row.get(1),
+            euro: row.get(2),
+            dollar: row.get(3),
+            min: row.get(4),
+            max: row.get(5),
+            change: row.get(6),
+            median: row.get(7),
+            }
+        )
+        .collect())
+}
+
+
 #[get("/prices/<coin>")]
 fn get_prices_last_24_hours(coin: &str) -> String {
     let db = db::DB::new().expect("Unable to access DB");
     let c = get_coin(&db, coin.to_string());
-    format!("Prices 24 hours {}", c)
+    let prices = query(&db, &c).unwrap();
+    let j = serde_json::to_string(&prices).unwrap();
+    format!("{}", j)
 }
 
 
@@ -28,7 +82,7 @@ fn get_prices_last_24_hours(coin: &str) -> String {
 fn get_last_price(coin: &str) -> String {
     let db = db::DB::new().expect("Unable to access DB");
     let c = get_coin(&db, coin.to_string());
-    format!("Most recent price {}", c)
+    format!("Most recent price {}\n", c)
 }
 
 
