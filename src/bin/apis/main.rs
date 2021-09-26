@@ -2,6 +2,7 @@
 use rooney::db;
 
 use log::{error, info};
+use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
 
 
@@ -31,7 +32,7 @@ pub struct Price {
     ticker: String,
     euro: f32,
     dollar: f32,
-    time: String,
+    time: NaiveDateTime,
 }
 
 
