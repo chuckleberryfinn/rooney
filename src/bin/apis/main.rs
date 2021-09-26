@@ -37,7 +37,7 @@ pub struct Price {
 
 pub fn query(db: &db::DB, coin: &str) -> Option<Vec<Price>> {
     let query =
-        "select name, ticker, euro, dollar, time
+        "select name, ticker, cast(euro as real), cast(dollar as real), time
         from prices
         join coins using(coin_id)
         where time >= now() - interval '24 hours'
