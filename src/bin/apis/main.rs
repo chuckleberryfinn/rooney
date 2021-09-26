@@ -1,4 +1,6 @@
 #[macro_use] extern crate rocket;
+use rocket::http::Header;
+use rocket::fairing::AdHoc;
 use rooney::db;
 
 use log::{error, info};
@@ -53,11 +55,11 @@ pub fn query(db: &db::DB, coin: &str) -> Option<Vec<Price>> {
     Some(rows
         .iter()
         .map(|row| Price {
-            name: row.get(0),
-            ticker: row.get(1),
-            euro: row.get(2),
-            dollar: row.get(3),
-            time: row.get(4),
+                name: row.get(0),
+                ticker: row.get(1),
+                euro: row.get(2),
+                dollar: row.get(3),
+                time: row.get(4),
             }
         )
         .collect())
@@ -88,4 +90,7 @@ fn rocket() -> _ {
 
     rocket::build()
         .mount("/", routes![get_prices_last_24_hours, get_last_price])
+        .attach(AdHoc::on_response("CORS", |_, resp| Box::pin(async move {
+            resp.set_header(Header::new("Access-Control-Allow-Origin", "*"));
+        })))
 }
