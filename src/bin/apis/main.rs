@@ -1,6 +1,4 @@
-#[macro_use] extern crate rocket;
-use rocket::http::Header;
-use rocket::fairing::AdHoc;
+use actix_web::{get, web, App, HttpResponse, HttpServer, Responder};
 use rooney::db;
 
 use log::{error, info};
@@ -66,31 +64,42 @@ pub fn query(db: &db::DB, coin: &str) -> Option<Vec<Price>> {
 }
 
 
-#[get("/prices/<coin>")]
-fn get_prices_last_24_hours(coin: &str) -> String {
+#[get("/prices/{coin}")]
+async fn get_prices_last_24_hours(coin: web::Path<String>) -> impl Responder {
+    let coin = coin.into_inner();
     let db = db::DB::new().expect("Unable to access DB");
     let c = get_coin(&db, coin.to_string());
     let prices = query(&db, &c).unwrap();
     let j = serde_json::to_string(&prices).unwrap();
-    format!("{}", j)
+    HttpResponse::Ok().body(j)
 }
 
 
-#[get("/coin/<coin>")]
-fn get_last_price(coin: &str) -> String {
+#[get("/coin/{coin}")]
+async fn get_last_price(coin: web::Path<String>) -> impl Responder {
+    let coin = coin.into_inner();
     let db = db::DB::new().expect("Unable to access DB");
     let c = get_coin(&db, coin.to_string());
-    format!("Most recent price {}\n", c)
+    HttpResponse::Ok().body(format!("Most recent price {}\n", c))
 }
 
 
-#[launch]
-fn rocket() -> _ {
-    info!("Launching rocket");
+#[actix_web::main]
+async fn main() -> std::io::Result<()> {
+    info!("Launching Actix");
 
-    rocket::build()
-        .mount("/", routes![get_prices_last_24_hours, get_last_price])
-        .attach(AdHoc::on_response("CORS", |_, resp| Box::pin(async move {
-            resp.set_header(Header::new("Access-Control-Allow-Origin", "*"));
-        })))
+    let mut builder = SslAcceptor::mozilla_intermediate(SslMethod::tls()).unwrap();
+    builder
+        .set_private_key_file("pems/key.pem", SslFiletype::PEM)
+        .unwrap();
+    builder.set_certificate_chain_file("pems/cert.pem").unwrap();
+
+    HttpServer::new(|| {
+        App::new()
+            .service(get_prices_last_24_hours)
+            .service(get_last_price)
+    })
+        .bind_openssl("0.0.0.0:8000", builder)?
+        .run()
+        .await
 }
