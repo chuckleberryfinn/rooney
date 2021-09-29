@@ -62,10 +62,6 @@ impl Commands {
         c.run(&mut self.db, &Some(message))
     }
 
-    fn find_command(&self, command: &str) -> &dyn Command {
-        &**self.commands.iter().find(|c| c.name() == command).unwrap_or(&self.remark)
-    }
-
     fn help(&self) -> Result<String> {
         Ok("Commands: !advice !ats !bears !bulls !help !coin !diff !fiat !stats. \
             !help [command] for more information on a specific command.".to_string())
