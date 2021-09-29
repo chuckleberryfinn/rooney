@@ -20,7 +20,7 @@ pub struct Movers {
 
 
 impl Bulls {
-    fn query(&self, db: &db::DB) -> Option<Movers> {
+    fn query(&self, db: &mut db::DB) -> Option<Movers> {
         let query =
             "with movers as (
                 select distinct coin_id, first_value(euro) over w as first, last_value(euro) over w as last
@@ -33,7 +33,7 @@ impl Bulls {
             join coins using(coin_id)
             order by diff desc limit 3;";
     
-        let rows = db.connection.query(&query, &[]).unwrap();
+        let rows = db.connection.query(query, &[]).unwrap();
         if rows.len() < 3 {
             return None;
         }
@@ -47,7 +47,7 @@ impl Command for Bulls {
         "!bulls"
     }
 
-    fn run(&self, db: &db::DB, _: &Option<&str>) -> Result<String> {
+    fn run(&self, db: &mut db::DB, _: &Option<&str>) -> Result<String> {
         let movers = self.query(db);
 
         match movers {
@@ -68,7 +68,7 @@ pub(super) struct Bears;
 
 
 impl Bears {
-    fn query(&self, db: &db::DB) -> Option<Movers> {
+    fn query(&self, db: &mut db::DB) -> Option<Movers> {
         let query =
             "with movers as (
                 select distinct coin_id, first_value(euro) over w as first, last_value(euro) over w as last
@@ -81,7 +81,7 @@ impl Bears {
             join coins using(coin_id)
             order by diff asc limit 3;";
     
-        let rows = db.connection.query(&query, &[]).unwrap();
+        let rows = db.connection.query(query, &[]).unwrap();
         if rows.len() < 3 {
             return None;
         }
@@ -95,8 +95,8 @@ impl Command for Bears {
         "!bears"
     }
 
-    fn run(&self, db: &db::DB, _: &Option<&str>) -> Result<String> {
-        let movers = self.query(&db);
+    fn run(&self, db: &mut db::DB, _: &Option<&str>) -> Result<String> {
+        let movers = self.query(db);
 
         match movers {
             Some(ms) => Ok(ms.to_string()),

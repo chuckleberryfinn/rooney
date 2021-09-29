@@ -7,7 +7,7 @@ use std::{env, thread, time};
 
 
 fn bot(messenger: impl Messenger) -> Result<()> {
-    let commands = match commands::Commands::new() {
+    let mut commands = match commands::Commands::new() {
         Ok(c) => c,
         Err(_) => return Err(Error::Contact)
     };
@@ -19,7 +19,7 @@ fn bot(messenger: impl Messenger) -> Result<()> {
 
 trait Messenger {
     fn init(&self) -> Result<()>;
-    fn run(&self, handler: impl Fn(&str) -> commands::Result<String>) -> Result<()>;
+    fn run(&self, handler: impl FnMut(&str) -> commands::Result<String>) -> Result<()>;
 }
 
 

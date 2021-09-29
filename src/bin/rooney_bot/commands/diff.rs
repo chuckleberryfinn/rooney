@@ -21,7 +21,7 @@ struct _Diff {
 
 
 impl Diff {
-    fn query(&self, db: &db::DB, coin: String, date: NaiveDate) -> Option<_Diff> {
+    fn query(&self, db: &mut db::DB, coin: String, date: NaiveDate) -> Option<_Diff> {
         let query =
             "with first as (
                 select coin_id, date, average_euro as first
@@ -38,13 +38,13 @@ impl Diff {
             where name = ($1)
             order by time desc limit 1;";
     
-        let rows = db.connection.query(&query, &[&coin, &date]).unwrap();
+        let rows = db.connection.query(query, &[&coin, &date]).unwrap();
     
         if rows.is_empty() {
             return None;
         }
     
-        let row = rows.get(0);
+        let row = rows.get(0).unwrap();
         Some(_Diff{
             name: row.get(0),
             ticker: row.get(1),
@@ -73,11 +73,11 @@ impl Command for Diff {
         "!diff"
     }
 
-    fn run(&self, db: &db::DB, msg: &Option<&str>) -> Result<String> {
+    fn run(&self, db: &mut db::DB, msg: &Option<&str>) -> Result<String> {
         let commands: Vec<&str> = msg.unwrap().split_whitespace().collect();
         let coin = self.get_coin(&db, self.parse_coin_arg(&commands));
         let date = self.parse_date(&commands);
-        let diff = self.query(&db, coin, date);
+        let diff = self.query(db, coin, date);
 
         match diff {
             Some(d) => Ok(d.to_string()),

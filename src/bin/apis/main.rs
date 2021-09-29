@@ -6,7 +6,7 @@ use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
 
 
-fn get_coin(db: &db::DB, coin: String) -> String {
+fn get_coin(db: &mut db::DB, coin: String) -> String {
     if db.all_coins.contains(&coin) {
         return coin;
     }
@@ -36,7 +36,7 @@ pub struct Price {
 }
 
 
-pub fn query(db: &db::DB, coin: &str) -> Option<Vec<Price>> {
+pub fn query(db: &mut db::DB, coin: &str) -> Option<Vec<Price>> {
     let query =
         "select name, ticker, cast(euro as real), cast(dollar as real), time
         from prices
@@ -67,9 +67,9 @@ pub fn query(db: &db::DB, coin: &str) -> Option<Vec<Price>> {
 #[get("/prices/{coin}")]
 async fn get_prices_last_24_hours(coin: web::Path<String>) -> impl Responder {
     let coin = coin.into_inner();
-    let db = db::DB::new().expect("Unable to access DB");
-    let c = get_coin(&db, coin.to_string());
-    let prices = query(&db, &c).unwrap();
+    let mut db = db::DB::new().expect("Unable to access DB");
+    let c = get_coin(&mut db, coin.to_string());
+    let prices = query(&mut db, &c).unwrap();
     let j = serde_json::to_string(&prices).unwrap();
     HttpResponse::Ok().body(j)
 }
@@ -78,8 +78,8 @@ async fn get_prices_last_24_hours(coin: web::Path<String>) -> impl Responder {
 #[get("/coin/{coin}")]
 async fn get_last_price(coin: web::Path<String>) -> impl Responder {
     let coin = coin.into_inner();
-    let db = db::DB::new().expect("Unable to access DB");
-    let c = get_coin(&db, coin.to_string());
+    let mut db = db::DB::new().expect("Unable to access DB");
+    let c = get_coin(&mut db, coin.to_string());
     HttpResponse::Ok().body(format!("Most recent price {}\n", c))
 }
 
@@ -88,18 +88,18 @@ async fn get_last_price(coin: web::Path<String>) -> impl Responder {
 async fn main() -> std::io::Result<()> {
     info!("Launching Actix");
 
-    let mut builder = SslAcceptor::mozilla_intermediate(SslMethod::tls()).unwrap();
+    /*let mut builder = SslAcceptor::mozilla_intermediate(SslMethod::tls()).unwrap();
     builder
         .set_private_key_file("pems/key.pem", SslFiletype::PEM)
         .unwrap();
-    builder.set_certificate_chain_file("pems/cert.pem").unwrap();
+    builder.set_certificate_chain_file("pems/cert.pem").unwrap();*/
 
     HttpServer::new(|| {
         App::new()
             .service(get_prices_last_24_hours)
             .service(get_last_price)
     })
-        .bind_openssl("0.0.0.0:8000", builder)?
+        .bind("0.0.0.0:8000")?
         .run()
         .await
 }

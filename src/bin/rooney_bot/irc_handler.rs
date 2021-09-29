@@ -9,7 +9,7 @@ impl Messenger for IrcClient {
         Ok(self.identify()?)
     }
 
-    fn run(&self, handler: impl Fn(&str) -> commands::Result<String>) -> Result<()> {
+    fn run(&self, mut handler: impl FnMut(&str) -> commands::Result<String>) -> Result<()> {
         Ok(self.for_each_incoming(|message| {
             if let Command::PRIVMSG(ref target, ref msg) = message.command {
                 match handler(&msg) {

@@ -19,7 +19,7 @@ pub struct _Coin {
 
 
 impl Coin {
-    pub fn query(&self, db: &db::DB, coin: &str) -> Option<_Coin> {
+    pub fn query(&self, db: &mut db::DB, coin: &str) -> Option<_Coin> {
         let query =
             "with daily_prices as (
                 select * from prices
@@ -65,7 +65,7 @@ impl Coin {
             return None;
         }
     
-        let row = rows.get(0);
+        let row = rows.get(0).unwrap();
         Some(_Coin {
             name: row.get(0),
             ticker: row.get(1),
@@ -85,10 +85,10 @@ impl Command for Coin {
         "!coin"
     }
 
-    fn run(&self, db: &db::DB, msg: &Option<&str>) -> Result<String> {
+    fn run(&self, db: &mut db::DB, msg: &Option<&str>) -> Result<String> {
         let commands: Vec<&str> = msg.unwrap().split_whitespace().collect();
         let coin = self.get_coin(&db, self.parse_coin_arg(&commands));
-        let price = self.query(&db, &coin);
+        let price = self.query(db, &coin);
 
         match price {
             Some(p) => Ok(p.display()),
@@ -106,7 +106,7 @@ impl CommandArgs for Coin {}
 
 
 impl Coin24 {
-    pub fn query(&self, db: &db::DB, coin: &str) -> Option<_Coin> {
+    pub fn query(&self, db: &mut db::DB, coin: &str) -> Option<_Coin> {
         let query =
             "with daily_prices as (
                 select * from prices
@@ -152,7 +152,7 @@ impl Coin24 {
             return None;
         }
     
-        let row = rows.get(0);
+        let row = rows.get(0).unwrap();
         Some(_Coin {
             name: row.get(0),
             ticker: row.get(1),
@@ -172,10 +172,10 @@ impl Command for Coin24 {
         "!coin24"
     }
 
-    fn run(&self, db: &db::DB, msg: &Option<&str>) -> Result<String> {
+    fn run(&self, db: &mut db::DB, msg: &Option<&str>) -> Result<String> {
         let commands: Vec<&str> = msg.unwrap().split_whitespace().collect();
         let coin = self.get_coin(&db, self.parse_coin_arg(&commands));
-        let price = self.query(&db, &coin);
+        let price = self.query(db, &coin);
 
         match price {
             Some(p) => Ok(p.to_string()),

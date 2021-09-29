@@ -40,7 +40,7 @@ impl Commands {
         })
     }
 
-    pub(super) fn handle(&self, message: &str) -> Result<String> {
+    pub(super) fn handle(&mut self, message: &str) -> Result<String> {
         let mut split = message.splitn(2, ' ');
         let command = split.next().unwrap();
         let rest = split.next();
@@ -50,7 +50,7 @@ impl Commands {
                 None => self.help(),
                 Some(r) => {
                     let mut split = r.splitn(2, ' ');
-                    let c = self.find_command(&split.next().unwrap());
+                    let c = self.commands.iter().find(|c| c.name() == split.next().unwrap()).unwrap_or(&self.remark);
                     match c.name() {
                         "remark" => self.help(),
                         _ => Ok(c.help().to_string()),
@@ -58,7 +58,8 @@ impl Commands {
                 }
             }
         }
-        self.find_command(&command).run(&self.db, &Some(message))
+        let c = self.commands.iter().find(|c| c.name() == command).unwrap_or(&self.remark);
+        c.run(&mut self.db, &Some(message))
     }
 
     fn find_command(&self, command: &str) -> &dyn Command {
@@ -95,7 +96,7 @@ trait Cooldown {
 
 trait Command {
     fn name(&self) -> &'static str;
-    fn run(&self, db: &db::DB, args: &Option<&str>) -> Result<String>;
+    fn run(&self, db: &mut db::DB, args: &Option<&str>) -> Result<String>;
     fn help(&self) -> &'static str;
 }
 
