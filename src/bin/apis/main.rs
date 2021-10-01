@@ -88,18 +88,18 @@ async fn get_last_price(coin: web::Path<String>) -> impl Responder {
 async fn main() -> std::io::Result<()> {
     info!("Launching Actix");
 
-    /*let mut builder = SslAcceptor::mozilla_intermediate(SslMethod::tls()).unwrap();
+    let mut builder = SslAcceptor::mozilla_intermediate(SslMethod::tls()).unwrap();
     builder
         .set_private_key_file("pems/key.pem", SslFiletype::PEM)
         .unwrap();
-    builder.set_certificate_chain_file("pems/cert.pem").unwrap();*/
+    builder.set_certificate_chain_file("pems/cert.pem").unwrap();
 
     HttpServer::new(|| {
         App::new()
             .service(get_prices_last_24_hours)
             .service(get_last_price)
     })
-        .bind("0.0.0.0:8000")?
+        .bind_ssl("0.0.0.0:8000")?
         .run()
         .await
 }
