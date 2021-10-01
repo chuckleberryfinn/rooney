@@ -99,7 +99,7 @@ async fn main() -> std::io::Result<()> {
             .service(get_prices_last_24_hours)
             .service(get_last_price)
     })
-        .bind_ssl("0.0.0.0:8000")?
+        .bind_openssl("0.0.0.0:8000", builder)?
         .run()
         .await
 }
