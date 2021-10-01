@@ -72,7 +72,9 @@ async fn get_prices_last_24_hours(coin: web::Path<String>) -> impl Responder {
     let c = get_coin(&mut db, coin.to_string());
     let prices = query(&mut db, &c).unwrap();
     let j = serde_json::to_string(&prices).unwrap();
-    HttpResponse::Ok().body(j)
+    HttpResponse::Ok()
+        .header("Access-Control-Allow-Origin", "*")
+        .body(j)
 }
 
 
@@ -81,7 +83,9 @@ async fn get_last_price(coin: web::Path<String>) -> impl Responder {
     let coin = coin.into_inner();
     let mut db = db::DB::new().expect("Unable to access DB");
     let c = get_coin(&mut db, coin.to_string());
-    HttpResponse::Ok().body(format!("Most recent price {}\n", c))
+    HttpResponse::Ok()
+        .header("Access-Control-Allow-Origin", "*")
+        .body(format!("Most recent price {}\n", c))
 }
 
 
