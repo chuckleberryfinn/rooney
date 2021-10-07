@@ -16,7 +16,7 @@ struct _Fiat {
 
 
 impl Fiat {
-    fn query(&self, db: &db::DB, coin: String, amount: f32) -> Option<_Fiat> {
+    fn query(&self, db: &mut db::DB, coin: String, amount: f32) -> Option<_Fiat> {
         let price = price::Coin.query(db, &coin).unwrap();
     
         Some(_Fiat {
@@ -34,11 +34,11 @@ impl Command for Fiat {
         "!fiat"
     }
 
-    fn run(&self, db: &db::DB, msg: &Option<&str>) -> Result<String> {
+    fn run(&self, db: &mut db::DB, msg: &Option<&str>) -> Result<String> {
         let commands: Vec<&str> = msg.unwrap().split_whitespace().collect();
         let coin = self.get_coin(&db, self.parse_coin_arg(&commands));
         let amount = self.parse_amount(&commands);
-        let fiat = self.query(&db, coin, amount);
+        let fiat = self.query(db, coin, amount);
 
         match fiat {
             Some(f) => Ok(f.to_string()),

@@ -18,14 +18,14 @@ impl Advice {
         }
     }
 
-    fn query(&self, db: &db::DB) -> Option<String> {
+    fn query(&self, db: &mut db::DB) -> Option<String> {
         let query = "select response from advice offset floor(random()*(select count(*) from advice)) limit 1;";
 
         let rows = db.connection.query(query, &[]).unwrap();
         if rows.is_empty() {
             return None
         }
-        Some(rows.get(0).get(0))
+        Some(rows.get(0).unwrap().get(0))
     }
 }
 
@@ -64,11 +64,11 @@ impl Command for Advice {
         "!advice"
     }
 
-    fn run(&self, db: &db::DB, _: &Option<&str>) -> Result<String> {
+    fn run(&self, db: &mut db::DB, _: &Option<&str>) -> Result<String> {
         if self.on_cooldown() {
             Err(Error::Cooldown)
         } else {
-            Ok(self.query(&db).unwrap())
+            Ok(self.query(db).unwrap())
         }
     }
 

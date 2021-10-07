@@ -18,7 +18,7 @@ impl Remark {
         }
     }
 
-    pub fn query(&self, db: &db::DB, msg: &str) -> Option<String> {
+    pub fn query(&self, db: &mut db::DB, msg: &str) -> Option<String> {
         let query =
             "with all_remarks as (
                 select remark from replies
@@ -30,13 +30,13 @@ impl Remark {
             offset floor(random() * (select count(*) from all_remarks))
             limit 1;";
     
-        let rows = db.connection.query(&query, &[&msg]).unwrap();
+        let rows = db.connection.query(query, &[&msg]).unwrap();
     
         if rows.is_empty() {
             return None;
         }
     
-        Some(rows.get(0).get(0))
+        rows.get(0).unwrap().get(0)
     }
 }
 
@@ -69,11 +69,11 @@ impl Command for Remark {
         "remark"
     }
 
-    fn run(&self, db: &db::DB, msg: &Option<&str>) -> Result<String> {
+    fn run(&self, db: &mut db::DB, msg: &Option<&str>) -> Result<String> {
         if self.on_cooldown() {
             Err(Error::Cooldown)
         } else {
-            match self.query(&db, msg.unwrap()) {
+            match self.query(db, msg.unwrap()) {
                 Some(r) => {
                     self.set_last_call();
                     Ok(r)

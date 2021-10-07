@@ -21,7 +21,7 @@ struct _Stats {
 
 
 impl Stats {
-    fn query(&self, db: &db::DB, coin: String, date: NaiveDate) -> Option<_Stats> {
+    fn query(&self, db: &mut db::DB, coin: String, date: NaiveDate) -> Option<_Stats> {
         let query =
             "select name, ticker, date, cast(min_euro as real), cast(average_euro as real), cast(median_euro as real),
                 cast(std_dev as real), cast(max_euro as real)
@@ -29,13 +29,13 @@ impl Stats {
                 join coins using(coin_id)
                 where name = $1
                 and date = $2";
-        let rows = db.connection.query(&query, &[&coin, &date]).unwrap();
+        let rows = db.connection.query(query, &[&coin, &date]).unwrap();
 
         if rows.is_empty() {
             return None;
         }
 
-        let row = rows.get(0);
+        let row = rows.get(0).unwrap();
         Some(_Stats{
             name: row.get(0),
             ticker: row.get(1),
@@ -55,11 +55,11 @@ impl Command for Stats {
         "!stats"
     }
 
-    fn run(&self, db: &db::DB, msg: &Option<&str>) -> Result<String> {
+    fn run(&self, db: &mut db::DB, msg: &Option<&str>) -> Result<String> {
         let commands: Vec<&str> = msg.unwrap().split_whitespace().collect();
-        let coin = self.get_coin(&db, self.parse_coin_arg(&commands));
+        let coin = self.get_coin(db, self.parse_coin_arg(&commands));
         let date = self.parse_date(&commands);
-        let stats = self.query(&db, coin, date);
+        let stats = self.query(db, coin, date);
 
         match stats {
             Some(s) => Ok(s.to_string()),
