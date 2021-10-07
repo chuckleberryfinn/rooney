@@ -75,9 +75,9 @@ fn parse_json(body: &str) -> Result<Vec<Market>, Box<dyn Error>> {
 }
 
 
-fn add_coins(db: &db::DB, markets: &[Market]) -> Result<(), Box<dyn Error>> {
+fn add_coins(db: &mut db::DB, markets: &[Market]) -> Result<(), Box<dyn Error>> {
     let args = markets.iter().map(|m| m.get_args()).collect::<Vec<_>>();
-    let transaction = db.connection.transaction()?;
+    let mut transaction = db.connection.transaction()?;
     transaction.batch_execute("Create temporary table temp_coins(name varchar(255), ticker varchar(100)) on commit drop")?;
 
     for a in args {
@@ -90,7 +90,7 @@ fn add_coins(db: &db::DB, markets: &[Market]) -> Result<(), Box<dyn Error>> {
 }
 
 
-fn coins_ids(db: &db::DB) -> Result<HashMap<String, i32>, String> {
+fn coins_ids(db: &mut db::DB) -> Result<HashMap<String, i32>, String> {
     match db.connection.query("Select name, coin_id from coins;", &[]) {
         Ok(rows) => Ok(rows.iter().map(|r| (r.get::<usize, String>(0).to_lowercase(), r.get(1))).collect::<HashMap<_, _>>()),
         Err(e) => Err(format!("Unable to find name/coin_id mappings {}", e))
@@ -98,9 +98,9 @@ fn coins_ids(db: &db::DB) -> Result<HashMap<String, i32>, String> {
 }
 
 
-fn update_prices(db: &db::DB, coins_ids: HashMap<String, i32>, markets: &[Market]) -> Result<(), Box<dyn Error>> {
+fn update_prices(db: &mut db::DB, coins_ids: HashMap<String, i32>, markets: &[Market]) -> Result<(), Box<dyn Error>> {
     //This whole function is here to work around the Postgres numeric type and it's incompatibility with Rust.
-    let transaction = db.connection.transaction()?;
+    let mut transaction = db.connection.transaction()?;
     transaction.batch_execute("Create temporary table temp_prices(coin_id integer, euro real, dollar real) on commit drop")?;
 
     for m in markets {
@@ -126,18 +126,18 @@ fn get_updates(url: &str) -> Result<(), String> {
         Err(e) => return Err(format!("Unable to parse JSON: {}", e))
     };
 
-    let db = match db::DB::new() {
+    let mut db = match db::DB::new() {
         Ok(db) => db,
         Err(e) => return Err(format!("Unable to access DB: {}", e))
     };
 
-    match add_coins(&db, &markets) {
+    match add_coins(&mut db, &markets) {
         Ok(()) => (),
         Err(e) => return Err(format!("Unable to add coins: {}", e))
     };
 
-    let coins_ids = coins_ids(&db)?;
-    match update_prices(&db, coins_ids, &markets) {
+    let coins_ids = coins_ids(&mut db)?;
+    match update_prices(&mut db, coins_ids, &markets) {
         Ok(()) => Ok(()),
         Err(e) => Err(format!("Unable to update prices: {}", e))
     }

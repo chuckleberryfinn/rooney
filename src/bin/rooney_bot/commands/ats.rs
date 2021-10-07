@@ -19,7 +19,7 @@ struct _ATS {
 
 
 impl ATS {
-    fn query(&self, db: &db::DB, coin: String) -> Option<_ATS> {
+    fn query(&self, db: &mut db::DB, coin: String) -> Option<_ATS> {
         let query =
             "with all_ats as (
                 select min(euro) as lowest, max(euro) as ath
@@ -69,7 +69,7 @@ impl ATS {
             return None;
         }
 
-        let (lowest, highest) = (rows.get(0), rows.get(1));
+        let (lowest, highest) = (rows.get(0).unwrap(), rows.get(1).unwrap());
         Some(_ATS {
             name: coin,
             lowest_date: lowest.get(0),
@@ -86,10 +86,10 @@ impl Command for ATS {
         "!ats"
     }
 
-    fn run(&self, db: &db::DB, msg: &Option<&str>) -> Result<String> {
+    fn run(&self, db: &mut db::DB, msg: &Option<&str>) -> Result<String> {
         let commands: Vec<&str> = msg.unwrap().split_whitespace().collect();
         let coin = self.get_coin(&db, self.parse_coin_arg(&commands));
-        let ats = self.query(&db, coin);
+        let ats = self.query(db, coin);
 
         match ats {
             Some(a) => Ok(a.to_string()),
