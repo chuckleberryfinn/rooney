@@ -50,7 +50,7 @@ impl Commands {
                 None => self.help(),
                 Some(r) => {
                     let mut split = r.splitn(2, ' ');
-                    let c = self.commands.iter().find(|c| c.name() == split.next().unwrap()).unwrap_or(&self.remark);
+                    let c = self.commands.iter().find(|c| c.name() == split.next().unwrap_or("none")).unwrap_or(&self.remark);
                     match c.name() {
                         "remark" => self.help(),
                         _ => Ok(c.help().to_string()),
